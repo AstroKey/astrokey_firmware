@@ -101,17 +101,16 @@ SI_SEGMENT_VARIABLE(configDesc[],
                     SI_SEG_CODE) =
 {
   USB_CONFIG_DESCSIZE,             // bLength
-  USB_CONFIG_DESCRIPTOR,           // bLength
+  USB_CONFIG_DESCRIPTOR,           // bDescriptorType
   0x22,                            // wTotalLength(LSB)
   0x00,                            // wTotalLength(MSB)
   1,                               // bNumInterfaces
   1,                               // bConfigurationValue
   0,                               // iConfiguration
 
-  CONFIG_DESC_BM_RESERVED_D7 |     // bmAttrib: Self powered
-  CONFIG_DESC_BM_SELFPOWERED,
+  CONFIG_DESC_BM_RESERVED_D7,      // bmAttrib: Bus-powered
 
-  CONFIG_DESC_MAXPOWER_mA(100),    // bMaxPower: 100 mA
+  CONFIG_DESC_MAXPOWER_mA(500),    // bMaxPower: 100 mA
 
   //Interface 0 Descriptor
   USB_INTERFACE_DESCSIZE,          // bLength
@@ -120,8 +119,8 @@ SI_SEGMENT_VARIABLE(configDesc[],
   0,                               // bAlternateSetting
   1,                               // bNumEndpoints
   3,                               // bInterfaceClass: HID (Human Interface Device)
-  0,                               // bInterfaceSubClass
-  1,                               // bInterfaceProtocol
+  0,                               // bInterfaceSubClass (0 = not bootable)
+  1,                               // bInterfaceProtocol (1 = keyboard)
   0,                               // iInterface
 
   //HID Descriptor
@@ -133,16 +132,47 @@ SI_SEGMENT_VARIABLE(configDesc[],
   1,                               // bNumDescriptors
   USB_HID_REPORT_DESCRIPTOR,       // bDescriptorType
   sizeof( ReportDescriptor0 ),     // wDescriptorLength(LSB)
-  sizeof( ReportDescriptor0 )>>8,    // wDescriptorLength(MSB)
+  sizeof( ReportDescriptor0 )>>8,  // wDescriptorLength(MSB)
 
   //Endpoint 1 IN Descriptor
   USB_ENDPOINT_DESCSIZE,           // bLength
   USB_ENDPOINT_DESCRIPTOR,         // bDescriptorType
-  0x81,                            // bEndpointAddress
+  USB_EP_DIR_IN | 1,               // bEndpointAddress
   USB_EPTYPE_INTR,                 // bAttrib
   0x40,                            // wMaxPacketSize (LSB)
   0x00,                            // wMaxPacketSize (MSB)
   24,                              // bInterval
+  /*
+  //Interface 1 Descriptor
+  USB_INTERFACE_DESCSIZE,          // bLength
+  USB_INTERFACE_DESCRIPTOR,        // bDescriptorType
+  1,                               // bInterfaceNumber
+  0,                               // bAlternateSetting
+  1,                               // bNumEndpoints
+  3,                               // bInterfaceClass: HID (Human Interface Device)
+  0,                               // bInterfaceSubClass (0 = not bootable)
+  0,                               // bInterfaceProtocol (0 = none)
+  0,                               // iInterface
+
+  //HID Descriptor
+  USB_HID_DESCSIZE,                // bLength
+  USB_HID_DESCRIPTOR,              // bLength
+  0x11,                            // bcdHID (LSB)
+  0x01,                            // bcdHID (MSB)
+  0,                               // bCountryCode
+  1,                               // bNumDescriptors
+  USB_HID_REPORT_DESCRIPTOR,       // bDescriptorType
+  sizeof( ReportDescriptor0 ),     // wDescriptorLength(LSB)
+  sizeof( ReportDescriptor0 )>>8,  // wDescriptorLength(MSB)
+
+  //Endpoint 2 OUT Descriptor
+  USB_ENDPOINT_DESCSIZE,           // bLength
+  USB_ENDPOINT_DESCRIPTOR,         // bDescriptorType
+  USB_EP_DIR_OUT | 2,              // bEndpointAddress
+  USB_EPTYPE_INTR,                 // bAttrib
+  0x40,                            // wMaxPacketSize (LSB)
+  0x00,                            // wMaxPacketSize (MSB)
+  24,                              // bInterval*/
 };
 
 SI_SEGMENT_VARIABLE(bosDesc,
@@ -151,22 +181,19 @@ SI_SEGMENT_VARIABLE(bosDesc,
 {
   // BOS Descriptor
   {
-    USB_BOS_DESCRIPTOR_SIZE,  // Size of descriptor
-    USB_BOS_DESCRIPTOR_TYPE,  // BOS Descriptor type
-    USB_BOS_DESCRIPTOR_SIZE + // Length of this descriptor
-      WEBUSB_CAPABILITY_SIZE, // and all of its sub-descriptors
-    1                         // The number of separate device capability descriptors in the BOS
+    sizeof(USB_BOSDescriptor_TypeDef),      // Size of descriptor
+    USB_BOS_DESCRIPTOR_TYPE,                // BOS Descriptor type
+    sizeof(USB_BOSDescriptor_TypeDef) +     // Length of this descriptor
+      sizeof(WebUSB_DevCapability_TypeDef), // and all of its sub-descriptors
+    1                                       // The number of separate device capability descriptors in the BOS
   },
   // WebUSB Capability Descriptor
   {
-    WEBUSB_CAPABILITY_SIZE, // Size of descriptor (24)
-    WEBUSB_CAPABILITY_TYPE, // Device Capability descriptor type (0x10)
-    WEBUSB_PLATFORM_TYPE,   // Platform capability type (0x05).
-    0,                      // This field is reserved and shall be set to zero.
-    {
-      0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,
-      0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65
-    },                      // WebUSB UUID {3408b638-09a9-47a0-8bfd-a0768815b665}.
+    sizeof(WebUSB_DevCapability_TypeDef), // Size of descriptor (24)
+    WEBUSB_CAPABILITY_TYPE,               // Device Capability descriptor type (0x10)
+    WEBUSB_PLATFORM_TYPE,                 // Platform capability type (0x05).
+    0,                                    // This field is reserved and shall be set to zero.
+    WEBUSB_DEVCAPABILITY_UUID,            // WebUSB UUID {3408b638-09a9-47a0-8bfd-a0768815b665}.
     0x0100,                 // Protocol version supported. Must be set to 0x0100.
     WEBUSB_BREQUEST,        // bRequest value used for issuing WebUSB requests.
     1                       // URL Descriptor index of the device's landing page.
@@ -180,11 +207,6 @@ SI_SEGMENT_VARIABLE(bosDesc,
 #define PROD_SIZE     9
 #define SER_STRING    '0','1','2','3','4','5','6','7','8','A','B','C','D','E','F','\0'
 #define SER_SIZE      16
-
-#define URL0_STRING    'a','s','t','r','o','k','e','y','.','i','o','\0'
-#define URL0_SIZE      9
-#define URL1_STRING   'A','s','t','r','o','K','e','y','\0'
-#define URL1_SIZE     9
 
 
 LANGID_STATIC_CONST_STRING_DESC( langDesc[], LANG_STRING);
@@ -201,7 +223,6 @@ SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myUsbStringTable_USEnglish[], static const U
   serDesc,
 
 };
-
 //-----------------------------------------------------------------------------
 SI_SEGMENT_VARIABLE(initstruct,
                     const USBD_Init_TypeDef,
@@ -213,16 +234,17 @@ SI_SEGMENT_VARIABLE(initstruct,
   sizeof(myUsbStringTable_USEnglish) / sizeof(myUsbStringTable_USEnglish[0])                            // numberOfStrings
 };
 
-//-----------------------------------------------------------------------------
-SI_SEGMENT_VARIABLE_SEGMENT_POINTER(WebUSB_URLTable[], static const USB_StringDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE) =
-{
-  (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_CODE))langDesc,
-  mfrDesc,
-  prodDesc,
-  serDesc,
+#define URL0_STRING    'a','s','t','r','o','k','e','y','.','i','o','\0'
+#define URL0_SIZE      12
 
+URL_DESC( landingPage[] , URL0_SIZE, WEBUSB_SCHEME_HTTP, URL0_STRING);
+
+SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE) =
+{
+  landingPage,
 };
 
+uint16_t numUrls = sizeof(landingPage) / sizeof(landingPage[0]);
 
 #ifdef __cplusplus
 }

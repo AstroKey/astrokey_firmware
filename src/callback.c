@@ -45,8 +45,6 @@ void USBD_ResetCb(void)
 #if SLAB_USB_SOF_CB
 void USBD_SofCb(uint16_t sofNr)
 {
-  static bool keyReleased = 0;
-
   UNREFERENCED_ARGUMENT(sofNr);
 
   idleTimerTick();
@@ -103,20 +101,61 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
 {
   USB_Status_TypeDef retVal = USB_STATUS_REQ_UNHANDLED;
 
-  // Setup Command: Vendor request to device in direction IN
-  if ((setup->bmRequestType.Type == USB_SETUP_TYPE_VENDOR)
+  // Setup Command: Standard request to device in direction IN
+  if ((setup->bmRequestType.Type == USB_SETUP_TYPE_STANDARD)
       && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN)
       && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
   {
-    // A WebUSB compatible device must respond to
+    switch (setup->bRequest)
+    {
+      case GET_DESCRIPTOR: // Get Device Descriptor
+
+        // Binary object store descriptor
+        // This must include the capability descriptors as sub-descriptors, which
+        // cannot be directly accessed with a GetDescriptor command.
+        if ((setup->wValue >> 8) == USB_BOS_DESCRIPTOR_TYPE)
+        {
+          switch (setup->wIndex)
+          {
+            case 0: // Language 0
+              USBD_Write(EP0,
+                           (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&bosDesc,
+                           EFM8_MIN(sizeof(bosDesc), setup->wLength),
+                           false);
+              retVal = USB_STATUS_OK;
+              break;
+
+            default: // Unhandled Language
+              break;
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  // Setup Command: Vendor request to device in direction IN
+  else if ((setup->bmRequestType.Type == USB_SETUP_TYPE_VENDOR)
+      && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN)
+      && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
+  {
+    // A WebUSB compatible device must respond to appropriate requests
     switch (setup->bRequest)
     {
       case WEBUSB_BREQUEST: // WebUSB Platform
+	// WebUSB Request type
 	switch (setup->wIndex)
 	{
 	  case WEBUSB_REQUEST_GET_URL:
-
-	    retVal = USB_STATUS_OK;
+	    // Check to make sure the URL index requested is valid
+	    if (setup->wValue <= numUrls)
+	    {
+		USBD_Write(EP0,
+			   (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(myURLs[setup->wValue - 1]),
+			   EFM8_MIN(myURLs[setup->wValue - 1][0], setup->wLength),
+			   false);
+		retVal = USB_STATUS_OK;
+	    }
 	    break;
 	}
 	break;
@@ -138,7 +177,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 0: // Interface 0
+            case 0: // Language 0
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))ReportDescriptor0,
@@ -147,7 +186,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               retVal = USB_STATUS_OK;
               break;
 
-            default: // Unhandled Interface
+            default: // Unhandled Language
               break;
           }
         }
@@ -155,7 +194,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 0: // Interface 0
+            case 0: // Language 0
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&configDesc[18]),
@@ -164,26 +203,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               retVal = USB_STATUS_OK;
               break;
 
-            default: // Unhandled Interface
-              break;
-          }
-        }
-        // Binary object store descriptor
-        // This must include the capability descriptors as sub-descriptors, which
-        // cannot be directly accessed with a GetDescriptor command.
-        else if ((setup->wValue >> 8) == USB_BOS_DESCRIPTOR_TYPE)
-        {
-          switch (setup->wIndex)
-          {
-            case 0: // BOS 0
-              USBD_Write(EP0,
-			  (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&bosDesc),
-			  EFM8_MIN(sizeof(bosDesc), setup->wLength),
-			  false);
-              retVal = USB_STATUS_OK;
-              break;
-
-            default: // Unhandled Interface
+            default: // Unhandled Language
               break;
           }
         }
@@ -220,7 +240,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
           //           (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&noKeyReport,
           //           sizeof(KeyReport_TypeDef),
           //           false);
-          retVal = USB_STATUS_OK;
+          //retVal = USB_STATUS_OK;
         }
         break;
 
@@ -245,12 +265,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         }
         break;
     }
-  }
-  else if ((setup->bmRequestType.Type == USB_SETUP_TYPE_STANDARD)
-        && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN)
-        && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_INTERFACE))
-  {
-
   }
 
   return retVal;

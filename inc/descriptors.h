@@ -52,7 +52,25 @@ extern SI_SEGMENT_VARIABLE(configDesc[], const uint8_t, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(bosDesc, const struct{USB_BOSDescriptor_TypeDef bos; WebUSB_DevCapability_TypeDef cap;}, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);
 
+extern SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE);
+extern uint16_t numUrls;
+
 typedef uint8_t KeyReport_TypeDef[8];
+
+// BOS Descriptor + Platform Capability Descriptors
+typedef struct {
+  USB_BOSDescriptor_TypeDef bos;
+  WebUSB_DevCapability_TypeDef webCap;
+  MS_OS_20_DevCapability_TypeDef msCap;
+};
+
+// Dumb Microsoft OS 2.0 Descriptor
+typedef struct {
+  MS_OS_20_DescSetHeader_TypeDef;
+  MS_OS_20_ConfSubsetHeader_TypeDef;
+  MS_OS_20_FuncSubsetHeader_TypeDef;
+  MS_OS_20_CompatibleID_Descriptor_TypeDef;
+} MS_OS_20_DESCRIPTOR;
 
 #ifdef __cplusplus
 }
