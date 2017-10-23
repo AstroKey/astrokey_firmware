@@ -106,10 +106,11 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
       && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN)
       && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
   {
+    uint8_t index;
     switch (setup->bRequest)
     {
       case GET_DESCRIPTOR: // Get Device Descriptor
-
+	index = setup->wValue & 0xFF;
         // Binary object store descriptor
         // This must include the capability descriptors as sub-descriptors, which
         // cannot be directly accessed with a GetDescriptor command.
@@ -119,9 +120,9 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
           {
             case 0: // Language 0
               USBD_Write(EP0,
-                           (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&bosDesc,
-                           EFM8_MIN(sizeof(bosDesc), setup->wLength),
-                           false);
+			 (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&bosDesc,
+			 EFM8_MIN(sizeof(bosDesc), setup->wLength),
+			 false);
               retVal = USB_STATUS_OK;
               break;
 
@@ -129,6 +130,17 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               break;
           }
         }
+        /*else if ((setup->wValue >> 8) == USB_STRING_DESCRIPTOR)
+	{
+	  if (index == 0xEE)
+	  {
+            USBD_Write(EP0,
+		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))wcidDesc,
+		       EFM8_MIN(wcidDesc[0], setup->wLength),
+		       false);
+            retVal = USB_STATUS_OK;
+	  }
+	}*/
         break;
       default:
         break;
@@ -139,23 +151,40 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
       && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN)
       && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
   {
-    // A WebUSB compatible device must respond to appropriate requests
+    // Check request platform
     switch (setup->bRequest)
     {
-      case WEBUSB_BREQUEST: // WebUSB Platform
-	// WebUSB Request type
+      // WebUSB platform request
+      case WEBUSB_BREQUEST:
+        // Check request type
+        switch (setup->wIndex)
+        {
+          // Get URL request
+          case WEBUSB_REQUEST_GET_URL:
+            // Check to make sure the URL index requested is valid
+            if (setup->wValue <= numUrls && setup->wValue != 0)
+            {
+              USBD_Write(EP0,
+                         (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(myURLs[setup->wValue - 1]),
+                         EFM8_MIN(myURLs[setup->wValue - 1][0], setup->wLength),
+                         false);
+              retVal = USB_STATUS_OK;
+            }
+            break;
+        }
+        break;
+      // MS OS 2.0 platform request
+      case MS_OS_20_REQEUST:
+	// Check request type
 	switch (setup->wIndex)
 	{
-	  case WEBUSB_REQUEST_GET_URL:
-	    // Check to make sure the URL index requested is valid
-	    if (setup->wValue <= numUrls)
-	    {
-		USBD_Write(EP0,
-			   (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(myURLs[setup->wValue - 1]),
-			   EFM8_MIN(myURLs[setup->wValue - 1][0], setup->wLength),
-			   false);
-		retVal = USB_STATUS_OK;
-	    }
+	  // Get descriptor type
+	  case MS_OS_20_REQUEST_DESCRIPTOR:
+	    USBD_Write(EP0,
+		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&msDesc,
+		       EFM8_MIN(MS_DS_S, setup->wLength),
+		       false);
+	    retVal = USB_STATUS_OK;
 	    break;
 	}
 	break;

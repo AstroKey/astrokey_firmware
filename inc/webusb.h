@@ -8,17 +8,40 @@
 #ifndef INC_WEBUSB_H_
 #define INC_WEBUSB_H_
 
-#define USB_BOS_DESCRIPTOR_TYPE 0x0F
-#define USB_BOS_DESCRIPTOR_SIZE 5
+#define USB_BOS_DESCRIPTOR_TYPE      0x0F
+#define USB_BOS_DESCRIPTOR_SIZE      5
+#define USB_BOS_CAPABILITY_TYPE      0x10
+#define USB_BOS_EXTENSION_CAPABILITY 0x02
+#define USB_BOS_PLATFORM_CAPABILITY  0x05
 
-#define WEBUSB_CAPABILITY_TYPE  0x10
+// BOS Descriptor
+typedef struct
+{
+  uint8_t bLength;         // Size of descriptor (5)
+  uint8_t bDescriptorType; // BOS Descriptor type (0x0F)
+  uint16_t wTotalLength;   // Length of this descriptor and all of its sub descriptors
+  uint8_t bNumDeviceCaps;  // The number of separate device capability descriptors in the BOS
+} USB_BOSDescriptor_TypeDef;
+
+// USB 2.0 Extension Descriptor
+typedef struct
+{
+  uint8_t bLength;            // Size of descriptor (7)
+  uint8_t bDescriptorType;    // DEVICE CAPABILITY Descriptor type (0x10)
+  uint8_t bDevCapabilityType; // USB 2.0 EXTENSION (0x02)
+  uint32_t bmAttributes;      // Bitmap encoding of supported device level features.
+} USB20_ExtCapability_TypeDef;
+
+//////////////////
+// WebUSB stuff //
+//////////////////
+
 #define WEBUSB_CAPABILITY_SIZE  24
-#define WEBUSB_PLATFORM_TYPE    0x05
 
-// Descriptor requests
+// WebUSB Request Types
 #define WEBUSB_REQUEST_GET_URL  0x02
 
-// Descriptor types
+// WebUSB Descriptor Types
 #define WEBUSB_URL_DESCRIPTOR 0x03
 
 // String descriptor bScheme
@@ -30,15 +53,7 @@ typedef uint8_t USB_URLDescriptor_TypeDef; // URL Descriptor type
 
 #define URL_DESC(__name, __numbytes, __scheme, __val) \
   SI_SEGMENT_VARIABLE(__name,  static const USB_URLDescriptor_TypeDef, SI_SEG_CODE) = \
-    { __numbytes + 3, USB_STRING_DESCRIPTOR, __scheme, __val }
-
-typedef struct
-{
-  uint8_t bLength;         // Size of descriptor (5)
-  uint8_t bDescriptorType; // BOS Descriptor type (0x0F)
-  uint16_t wTotalLength;   // Length of this descriptor and all of its sub descriptors
-  uint8_t bNumDeviceCaps;  // The number of separate device capability descriptors in the BOS
-} USB_BOSDescriptor_TypeDef;
+    { __numbytes + 3, WEBUSB_URL_DESCRIPTOR, __scheme, __val }
 
 #define WEBUSB_DEVCAPABILITY_UUID { \
   0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47, \
@@ -62,14 +77,19 @@ typedef struct
 ////////////////////////
 
 #define MS_OS_20_DEVCAPABILITY_UUID { \
-    0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C, \
-    0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F  \
-  }
+  0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C, \
+  0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F  \
+}
 
-#define MS_OS_20_SET_HEADER_DESCRIPTOR       0x00
-#define MS_OS_20_SUBSET_HEADER_CONFIGURATION 0x01
-#define MS_OS_20_SUBSET_HEADER_FUNCTION      0x02
-#define MS_OS_20_FEATURE_COMPATIBLE_ID       0x03
+// MS OS 2.0 Request Types
+#define MS_OS_20_REQUEST_DESCRIPTOR 0x07
+
+#define MS_OS_20_SET_HEADER_DESCRIPTOR       htole16(0x00)
+#define MS_OS_20_SUBSET_HEADER_CONFIGURATION htole16(0x01)
+#define MS_OS_20_SUBSET_HEADER_FUNCTION      htole16(0x02)
+#define MS_OS_20_FEATURE_COMPATIBLE_ID       htole16(0x03)
+
+#define MS_OS_20_WINDOWS_VERSION htole32(0x06030000)
 
 typedef struct
 {

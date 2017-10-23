@@ -82,14 +82,14 @@ SI_SEGMENT_VARIABLE(deviceDesc[],
 {
   USB_DEVICE_DESCSIZE,             // bLength
   USB_DEVICE_DESCRIPTOR,           // bLength
-  htole16(0x0201),                 // bcdUSB
+  htole16(0x0210),                 // bcdUSB
   0,                               // bDeviceClass
   0,                               // bDeviceSubClass
   0,                               // bDeviceProtocol
   64,                              // bMaxPacketSize
   USB_VENDOR_ID,                   // idVendor
   USB_PRODUCT_ID,                  // idProduct
-  htole16(0x0100),                 // bcdDevice
+  htole16(0x0001),                 // bcdDevice
   1,                               // iManufacturer
   2,                               // iProduct
   3,                               // iSerialNumber
@@ -176,27 +176,75 @@ SI_SEGMENT_VARIABLE(configDesc[],
 };
 
 SI_SEGMENT_VARIABLE(bosDesc,
-		    const struct{USB_BOSDescriptor_TypeDef bos; WebUSB_DevCapability_TypeDef cap;},
+		    const USB_BOS_TypeDef,
 		    SI_SEG_CODE) =
 {
   // BOS Descriptor
   {
-    sizeof(USB_BOSDescriptor_TypeDef),      // Size of descriptor
-    USB_BOS_DESCRIPTOR_TYPE,                // BOS Descriptor type
-    sizeof(USB_BOSDescriptor_TypeDef) +     // Length of this descriptor
-      sizeof(WebUSB_DevCapability_TypeDef), // and all of its sub-descriptors
-    1                                       // The number of separate device capability descriptors in the BOS
+    sizeof(USB_BOSDescriptor_TypeDef), // Size of descriptor (5)
+    USB_BOS_DESCRIPTOR_TYPE,           // BOS Descriptor type (0x0F)
+    htole16(sizeof(USB_BOS_TypeDef)),  // Length of this descriptor and all of its sub-descriptors
+    3                                  // The number of separate device capability descriptors in the BOS
+  },
+  // USB 2.0 Extension Capability Descriptor
+  {
+    sizeof(USB20_ExtCapability_TypeDef), // Size of descriptor (7)
+    USB_BOS_CAPABILITY_TYPE,             // DEVICE CAPABILITY Descriptor type (0x10)
+    USB_BOS_EXTENSION_CAPABILITY,        // USB 2.0 EXTENSION (0x02)
+    htole32(0x00000000)                  // Bitmap encoding of supported device level features.
   },
   // WebUSB Capability Descriptor
   {
     sizeof(WebUSB_DevCapability_TypeDef), // Size of descriptor (24)
-    WEBUSB_CAPABILITY_TYPE,               // Device Capability descriptor type (0x10)
-    WEBUSB_PLATFORM_TYPE,                 // Platform capability type (0x05).
+    USB_BOS_CAPABILITY_TYPE,              // Device Capability descriptor type (0x10)
+    USB_BOS_PLATFORM_CAPABILITY,          // Platform capability type (0x05).
     0,                                    // This field is reserved and shall be set to zero.
     WEBUSB_DEVCAPABILITY_UUID,            // WebUSB UUID {3408b638-09a9-47a0-8bfd-a0768815b665}.
-    0x0100,                 // Protocol version supported. Must be set to 0x0100.
+    htole16(0x0100),        // Protocol version supported. Must be set to 0x0100.
     WEBUSB_BREQUEST,        // bRequest value used for issuing WebUSB requests.
     1                       // URL Descriptor index of the device's landing page.
+  },
+  // MS_OS_20 Capability Descriptor
+  {
+    sizeof(MS_OS_20_DevCapability_TypeDef),          // Size of descriptor
+    USB_BOS_CAPABILITY_TYPE,                         // Device Capability descriptor type (0x10)
+    USB_BOS_PLATFORM_CAPABILITY,                     // Platform capability type (0x05).
+    0,                                               // This field is reserved and shall be set to zero.
+    MS_OS_20_DEVCAPABILITY_UUID,                     // Must be set to {D8DD60DF-4589-4CC7-9CD2-659D9E648A9F}.
+    MS_OS_20_WINDOWS_VERSION,                        // Windows version
+    htole16(sizeof(MS_OS_20_DescriptorSet_TypeDef)), // The length, in bytes of the MS OS 2.0 descriptor set.
+    MS_OS_20_REQEUST,                                // Vendor defined code to use to retrieve this version of the MS OS 2.0 descriptor and also to set alternate enumeration behavior on the device.
+    0                                                // A non-zero value to send to the device to indicate that the device may return non-default USB descriptors for enumeration.
+  }
+};
+
+SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE) =
+{
+  {
+    MS_DSH_S,                       // The length, in bytes, of this header. Shall be set to 10.
+    MS_OS_20_SET_HEADER_DESCRIPTOR, // MS_OS_20_SET_HEADER_DESCRIPTOR
+    MS_OS_20_WINDOWS_VERSION,       // Windows version.
+    MS_DS_S                         // The size of entire MS OS 2.0 descriptor set. The value shall match the value in the descriptor set information structure.
+  },
+  {
+    MS_CSH_S,                             // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_OS_20_SUBSET_HEADER_CONFIGURATION, // MS_OS_20_SUBSET_HEADER_CONFIGURATION
+    0,                                    // The configuration value for the USB configuration to which this subset applies.
+    0,                                    // Shall be set to 0.
+    MS_CSH_S + MS_FSH_S + MS_CID_S        // The size of entire configuration subset including this header.
+  },
+  {
+    MS_FSH_S,         // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_OS_20_SUBSET_HEADER_FUNCTION, // MS_OS_20_SUBSET_HEADER_FUNCTION
+    0,  // The interface number for the first interface of the function to which this subset applies.
+    0,        // Shall be set to 0.
+    MS_FSH_S + MS_CID_S   // The size of entire function subset including this header.
+  },
+  {
+    MS_CID_S,                          // The length, bytes, of the compatible ID descriptor including value descriptors. Shall be set to 20.
+    MS_OS_20_FEATURE_COMPATIBLE_ID,    // MS_OS_20_FEATURE_COMPATIBLE_ID
+    {'W','I','N','U','S','B',  0,  0}, // Compatible ID String
+    {  0,  0,  0,  0,  0,  0,  0,  0}  // Sub-compatible ID String
   }
 };
 
@@ -234,10 +282,10 @@ SI_SEGMENT_VARIABLE(initstruct,
   sizeof(myUsbStringTable_USEnglish) / sizeof(myUsbStringTable_USEnglish[0])                            // numberOfStrings
 };
 
-#define URL0_STRING    'a','s','t','r','o','k','e','y','.','i','o','\0'
-#define URL0_SIZE      12
+#define URL0_STRING    'w','i','k','i','p','e','d','i','a','.','c','o','m','\0'
+#define URL0_SIZE      14
 
-URL_DESC( landingPage[] , URL0_SIZE, WEBUSB_SCHEME_HTTP, URL0_STRING);
+URL_DESC( landingPage[] , URL0_SIZE, WEBUSB_SCHEME_HTTPS, URL0_STRING);
 
 SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE) =
 {
