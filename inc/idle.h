@@ -1,35 +1,45 @@
-/**************************************************************************//**
- * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
- *
- * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
- *****************************************************************************/
+/////////////////////////////////////////////////////////////////////////////
+// idle.h
+/////////////////////////////////////////////////////////////////////////////
 
-#include "si_toolchain.h"
+#ifndef __IDLE_H__
+#define __IDLE_H__
+
+/////////////////////////////////////////////////////////////////////////////
+// Includes
+/////////////////////////////////////////////////////////////////////////////
+
 #include <stdint.h>
 #include <stdbool.h>
 
-// ----------------------------------------------------------------------------
-// Constants
-// ----------------------------------------------------------------------------
-#define DEFAULT_IDLE_RATE       500     // Rate defined in the HID class doc.
-#define POLL_RATE               24      // The bInterval reported with the
+/////////////////////////////////////////////////////////////////////////////
+// Definitions
+/////////////////////////////////////////////////////////////////////////////
+
+#define DEFAULT_IDLE_RATE_MS    0       // Rate defined in the HID class doc.
+                                        // 0 - infinite for joysticks/mice
+#define POLL_RATE_MS            8       // The bInterval reported with the
                                         // interrupt IN endpoint descriptor.
 
-// ----------------------------------------------------------------------------
-// Typedefs
-// ----------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////
+// Structures
+/////////////////////////////////////////////////////////////////////////////
+
 typedef struct
 {
-  uint8_t rate;
-  uint16_t timer;
+  uint8_t duration;   ///< idle duration in units of 4 ms
+  uint16_t timer;     ///< idle timer 1 ms ticks remaining before next report
 } idleTimer_TypeDef;
 
-// ----------------------------------------------------------------------------
-// Function Prototypes
-// ----------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////
+// Prototypes
+/////////////////////////////////////////////////////////////////////////////
+
 void idleTimerStart(void);
+void idleTimerTick(void);
 bool isIdleTimerIndefinite(void);
 bool isIdleTimerExpired(void);
-void idleTimerSet(uint8_t rate);
-void idleTimerTick(void);
-uint8_t idleGetRate(void);
+void idleSetDuration(uint8_t duration);
+uint8_t idleGetDuration(void);
+
+#endif

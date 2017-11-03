@@ -15,7 +15,8 @@
 #include "efm8_usb.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 // -------------------- USB Identification ------------------------------------
@@ -43,27 +44,43 @@ extern "C" {
 // Interface number of the HID keyboard
 #define HID_KEYBOARD_IFC                  0
 
+// Keyboard Report
+  typedef struct
+  {
+    uint8_t modifiers;
+    uint8_t reserved;
+    uint8_t keys[6];
+  } KeyReport_TypeDef;
+
+  extern KeyReport_TypeDef keyReport;
+  extern volatile bool keyReportSent;
+
 // bRequest number for WebUSB requests
 #define WEBUSB_BREQUEST                   1
 
 // bRequest number for MS_OS_20 requests
-#define MS_OS_20_REQEUST                  2
+#define MS_OS_20_BREQEUST                  2
+
+// bRequest number for Astrokey requests
+#define ASTROKEY_BREQUEST                 3
 
 // BOS Descriptor + Platform Capability Descriptors
-typedef struct {
-  USB_BOSDescriptor_TypeDef bos;
-  USB20_ExtCapability_TypeDef ext;
-  WebUSB_DevCapability_TypeDef webCap;
-  MS_OS_20_DevCapability_TypeDef msCap;
-} USB_BOS_TypeDef;
+  typedef struct
+  {
+    USB_BOSDescriptor_TypeDef bos;
+    USB20_ExtCapability_TypeDef ext;
+    WebUSB_DevCapability_TypeDef webCap;
+    MS_OS_20_DevCapability_TypeDef msCap;
+  } USB_BOS_TypeDef;
 
 // Dumb Microsoft OS 2.0 Descriptor Set
-typedef struct {
-  MS_OS_20_DescSetHeader_TypeDef descSet;
-  MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
-  MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
-  MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
-} MS_OS_20_DescriptorSet_TypeDef;
+  typedef struct
+  {
+    MS_OS_20_DescSetHeader_TypeDef descSet;
+    MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
+    MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
+    MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
+  } MS_OS_20_DescriptorSet_TypeDef;
 
 // Sizes of MS OS 2.0 Descriptor Subsets
 #define MS_DSH_S htole16(sizeof(MS_OS_20_DescSetHeader_TypeDef))
@@ -74,27 +91,25 @@ typedef struct {
 // Size of entire MS OS 2.0 Descriptor
 #define MS_DS_S htole16(sizeof(MS_OS_20_DescriptorSet_TypeDef))
 
-extern SI_SEGMENT_VARIABLE(ReportDescriptor0[69], const uint8_t, SI_SEG_CODE);
-extern SI_SEGMENT_VARIABLE(deviceDesc[], const USB_DeviceDescriptor_TypeDef, SI_SEG_CODE);
-extern SI_SEGMENT_VARIABLE(configDesc[], const uint8_t, SI_SEG_CODE);
-extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);
+  extern SI_SEGMENT_VARIABLE(ReportDescriptor0[69], const uint8_t, SI_SEG_CODE);
+  extern SI_SEGMENT_VARIABLE(deviceDesc[], const USB_DeviceDescriptor_TypeDef, SI_SEG_CODE);
+  extern SI_SEGMENT_VARIABLE(configDesc[], const uint8_t, SI_SEG_CODE);
+  extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);
 
-SI_SEGMENT_VARIABLE(wcidDesc[],  static const USB_StringDescriptor_TypeDef, SI_SEG_CODE) =
-{
-  0x12,                   // Length (18 Bytes)
-  0x03,                   // Descriptor Type (3 = String)
-  0x4D, 0x00, 0x53, 0x00, // MSFT100, Unicode LE
-  0x46, 0x00, 0x54, 0x00, //
-  0x31, 0x00, 0x30, 0x00, //
-  0x30, 0x00,             //
-  0x20,                   // Vendor Code
-  0x00                    // Padding
-};
+  SI_SEGMENT_VARIABLE(wcidDesc[], static const USB_StringDescriptor_TypeDef, SI_SEG_CODE) =
+  {
+    0x12,                   // Length (18 Bytes)
+    0x03,// Descriptor Type (3 = String)
+    0x4D, 0x00, 0x53, 0x00,// MSFT100, Unicode LE
+    0x46, 0x00, 0x54, 0x00,//
+    0x31, 0x00, 0x30, 0x00,//
+    0x30, 0x00,//
+    0x20,// Vendor Code
+    0x00// Padding
+  };
 
-extern SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE);
-extern uint16_t numUrls;
-
-typedef uint8_t KeyReport_TypeDef[8];
+  extern SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE);
+  extern uint16_t numUrls;
 
 extern SI_SEGMENT_VARIABLE(bosDesc, const USB_BOS_TypeDef, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE);
@@ -104,3 +119,7 @@ extern SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_
 #endif
 
 #endif  // #define __SILICON_LABS_DESCRIPTORS_H__
+// $[HID Report Descriptors]
+extern SI_SEGMENT_VARIABLE(ReportDescriptor0[69], const uint8_t, SI_SEG_CODE);
+// [HID Report Descriptors]$
+

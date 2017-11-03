@@ -213,7 +213,7 @@ SI_SEGMENT_VARIABLE(bosDesc,
     MS_OS_20_DEVCAPABILITY_UUID,                     // Must be set to {D8DD60DF-4589-4CC7-9CD2-659D9E648A9F}.
     MS_OS_20_WINDOWS_VERSION,                        // Windows version
     htole16(sizeof(MS_OS_20_DescriptorSet_TypeDef)), // The length, in bytes of the MS OS 2.0 descriptor set.
-    MS_OS_20_REQEUST,                                // Vendor defined code to use to retrieve this version of the MS OS 2.0 descriptor and also to set alternate enumeration behavior on the device.
+    MS_OS_20_BREQEUST,                                // Vendor defined code to use to retrieve this version of the MS OS 2.0 descriptor and also to set alternate enumeration behavior on the device.
     0                                                // A non-zero value to send to the device to indicate that the device may return non-default USB descriptors for enumeration.
   }
 };
@@ -282,8 +282,8 @@ SI_SEGMENT_VARIABLE(initstruct,
   sizeof(myUsbStringTable_USEnglish) / sizeof(myUsbStringTable_USEnglish[0])                            // numberOfStrings
 };
 
-#define URL0_STRING    'w','i','k','i','p','e','d','i','a','.','c','o','m','\0'
-#define URL0_SIZE      14
+#define URL0_STRING    'a','s','t','r','o','k','e','y','.','g','i','t','h','u','b','.','i','o','\0'
+#define URL0_SIZE      19
 
 URL_DESC( landingPage[] , URL0_SIZE, WEBUSB_SCHEME_HTTPS, URL0_STRING);
 

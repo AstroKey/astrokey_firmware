@@ -8,7 +8,6 @@
 #include "efm8_usb.h"
 #include "descriptors.h"
 #include "idle.h"
-#include "bsp.h"
 #include "webusb.h"
 
 // ----------------------------------------------------------------------------
@@ -45,14 +44,24 @@ void USBD_ResetCb(void)
 #if SLAB_USB_SOF_CB
 void USBD_SofCb(uint16_t sofNr)
 {
+  int8_t status;
   UNREFERENCED_ARGUMENT(sofNr);
 
   idleTimerTick();
 
   // Check if the device should send a report
-  if (isIdleTimerExpired() == true)
+  if (isIdleTimerExpired() == true || !keyReportSent)
   {
+    status = USBD_Write(EP0,
+              (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&keyReport,
+              sizeof(KeyReport_TypeDef),
+              false);
+    if (status == USB_STATUS_OK)
+      keyReportSent = true;
   }
+
+
+
 }
 #endif // SLAB_USB_SOF_CB
 
@@ -75,7 +84,7 @@ void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
   }
   else if (newState == USBD_STATE_CONFIGURED)
   {
-    idleTimerSet(POLL_RATE);
+    idleSetDuration(POLL_RATE_MS);
   }
 
   // Exiting suspend mode, power internal and external blocks up
@@ -130,17 +139,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               break;
           }
         }
-        /*else if ((setup->wValue >> 8) == USB_STRING_DESCRIPTOR)
-	{
-	  if (index == 0xEE)
-	  {
-            USBD_Write(EP0,
-		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))wcidDesc,
-		       EFM8_MIN(wcidDesc[0], setup->wLength),
-		       false);
-            retVal = USB_STATUS_OK;
-	  }
-	}*/
         break;
       default:
         break;
@@ -174,7 +172,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         }
         break;
       // MS OS 2.0 platform request
-      case MS_OS_20_REQEUST:
+      case MS_OS_20_BREQEUST:
 	// Check request type
 	switch (setup->wIndex)
 	{
@@ -265,11 +263,13 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 8)                  // Report length
             && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
         {
-          //USBD_Write(EP0,
-          //           (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&noKeyReport,
-          //           sizeof(KeyReport_TypeDef),
-          //           false);
-          //retVal = USB_STATUS_OK;
+          USBD_Write(EP0,
+                     (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&keyReport,
+                     sizeof(KeyReport_TypeDef),
+                     false);
+          keyReportSent = true;
+
+          retVal = USB_STATUS_OK;
         }
         break;
 
@@ -278,7 +278,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 0)
             && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
         {
-          idleTimerSet(setup->wValue >> 8);
+          idleSetDuration(setup->wValue >> 8);
           retVal = USB_STATUS_OK;
         }
         break;
@@ -288,7 +288,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 1)
             && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
         {
-          tmpBuffer = idleGetRate();
+          tmpBuffer = idleGetDuration();
           USBD_Write(EP0, &tmpBuffer, 1, false);
           retVal = USB_STATUS_OK;
         }
