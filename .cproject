@@ -112,7 +112,7 @@
 									<listOptionValue builtIn="false" value="NDEBUG=1"/>
 								</option>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.optimization.coloring.1752868787" name="Global register coloring" superClass="com.silabs.ide.si8051.keil.compiler.category.optimization.coloring" value="true" valueType="boolean"/>
-								<option id="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.1149224803" name="Emphasis" superClass="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis" value="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.speed" valueType="enumerated"/>
+								<option id="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.1149224803" name="Emphasis" superClass="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis" value="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.size" valueType="enumerated"/>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.includes.paths.1043210484" name="Include paths (INCDIR(...))" superClass="com.silabs.ide.si8051.keil.compiler.category.includes.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
@@ -139,6 +139,7 @@
 								<inputType id="com.silabs.ide.si8051.keil.assembler.inputType.362486429" superClass="com.silabs.ide.si8051.keil.assembler.inputType"/>
 							</tool>
 							<tool command="LX51" id="com.silabs.ide.si8051.keil.toolchain.linker.1670833202" name="Keil 8051 Linker" superClass="com.silabs.ide.si8051.keil.toolchain.linker">
+								<option id="com.silabs.ide.si8051.keil.linker.category.ordering.selection.483170182" name="Linker input ordering" superClass="com.silabs.ide.si8051.keil.linker.category.ordering.selection" value="./src/InitDevice.OBJ;./src/SILABS_STARTUP.OBJ;./src/callback.OBJ;./src/descriptors.OBJ;./src/idle.OBJ;./src/main.OBJ;./lib/efm8ub1/peripheralDrivers/src/usb_0.OBJ;./lib/efm8_usb/src/efm8_usbd.OBJ;./lib/efm8_usb/src/efm8_usbdch9.OBJ;./lib/efm8_usb/src/efm8_usbdep.OBJ;./lib/efm8_usb/src/efm8_usbdint.OBJ;./lib/efm8_assert/assert.OBJ" valueType="string"/>
 								<inputType id="com.silabs.ide.si8051.keil.linker.inputType.1119462710" superClass="com.silabs.ide.si8051.keil.linker.inputType"/>
 							</tool>
 							<tool id="com.silabs.ide.si8051.keil.toolchain.librarian.561607677" name="Keil 8051 Library Manager" superClass="com.silabs.ide.si8051.keil.toolchain.librarian"/>

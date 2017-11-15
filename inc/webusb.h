@@ -88,6 +88,7 @@ typedef struct
 #define MS_OS_20_SUBSET_HEADER_CONFIGURATION htole16(0x01)
 #define MS_OS_20_SUBSET_HEADER_FUNCTION      htole16(0x02)
 #define MS_OS_20_FEATURE_COMPATIBLE_ID       htole16(0x03)
+#define MS_OS_20_FEATURE_REG_PROPERTY        htole16(0x04)
 
 #define MS_OS_20_WINDOWS_VERSION htole32(0x06030000)
 
@@ -137,5 +138,16 @@ typedef struct
   uint8_t CompatibleID[8]; // Compatible ID String
   uint8_t SubCompatibleID[8]; // Sub-compatible ID String
 } MS_OS_20_CompatibleID_Descriptor_TypeDef;
+
+/*typedef struct
+{
+  uint16_t wLength; // The length, in bytes, of this header. Shall be set to 10.
+  uint16_t wDescriptorType; // MS_OS_20_FEATURE_REG_PROPERTY
+  uint16_t wPropertyDataType; // The type of registry property. See Table 15.
+  uint16_t wPropertyNameLength; //
+  uint8_t bPropertyName[0x2A];
+  uint16_t wPropertyDataLength;
+  uint8_t bPropertyData[0x50];
+}; MS_OS_20_RegistryProperty_Descriptor_TypeDef;*/
 
 #endif /* INC_WEBUSB_H_ */

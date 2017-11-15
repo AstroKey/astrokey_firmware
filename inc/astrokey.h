@@ -11,8 +11,13 @@
 #include <SI_EFM8UB1_Defs.h>
 #include <stdint.h>
 
+// Astrokey USB protocol
+
+// wIndex values
+#define ASTROKEY_SET_MACRO 0x01
+
 // Switch configuration
-#define NUM_SWTICHES 5
+#define NUM_SWITCHES 5
 #define S0 P0_B0
 #define S1 P0_B1
 #define S2 P0_B2
@@ -35,7 +40,16 @@ typedef struct {
   uint8_t value;
 } Macro_TypeDef;
 
-#define MACRO_MAX_SIZE 64
+#define MACRO_MAX_SIZE 32
 #define MACRO_MAX_KEYS 6
+#define MACRO_BYTES (MACRO_MAX_SIZE * sizeof(Macro_TypeDef))
+
+#define BOOTLOADER_START_ADDR 0x1A00
+#define MACRO_FLASH_ADDR (BOOTLOADER_START_ADDR - (NUM_SWITCHES * MACRO_BYTES))
+
+void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex);
+
+extern Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
+extern uint8_t macroNumActions;
 
 #endif /* INC_ASTROKEY_H_ */
