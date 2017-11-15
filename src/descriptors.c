@@ -214,11 +214,11 @@ SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE) =
     MS_CSH_S + MS_FSH_S + MS_CID_S        // The size of entire configuration subset including this header.
   },
   {
-    MS_FSH_S,         // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_FSH_S,                        // The length, in bytes, of this subset header. Shall be set to 8.
     MS_OS_20_SUBSET_HEADER_FUNCTION, // MS_OS_20_SUBSET_HEADER_FUNCTION
-    0,  // The interface number for the first interface of the function to which this subset applies.
-    0,        // Shall be set to 0.
-    MS_FSH_S + MS_CID_S   // The size of entire function subset including this header.
+    0,                               // The interface number for the first interface of the function to which this subset applies.
+    0,                               // Shall be set to 0.
+    MS_FSH_S + MS_CID_S              // The size of entire function subset including this header.
   },
   {
     MS_CID_S,                          // The length, bytes, of the compatible ID descriptor including value descriptors. Shall be set to 20.

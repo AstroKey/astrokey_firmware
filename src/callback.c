@@ -208,18 +208,23 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
     {
       // Astrokey platform request
       case ASTROKEY_BREQUEST:
-        switch (setup->wIndex)
+        switch (setup->wIndex) // Interface number
         {
-          case ASTROKEY_SET_MACRO:
-            memset((void*) tmpMacro, 0, MACRO_BYTES);
-            USBD_Read(EP0,
-                      (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))macro,
-                      EFM8_MIN(MACRO_BYTES, setup->wLength),
-                      false);
-            macroNumActions = EFM8_MIN(MACRO_MAX_SIZE, setup->wLength / 2);
+          case 0: // Interface 0
+            switch (setup->wValue >> 8) // Request type
+            {
+              case ASTROKEY_SET_MACRO:
+                memset((void*) tmpMacro, 0, MACRO_BYTES);
+                USBD_Read(EP0,
+                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))macro,
+                          EFM8_MIN(MACRO_BYTES, setup->wLength),
+                          false);
+                macroNumActions = EFM8_MIN(MACRO_MAX_SIZE, setup->wLength / 2);
 
-            //saveMacro(tmpMacro, setup->wValue);
-            retVal = USB_STATUS_OK;
+                //saveMacro(tmpMacro, setup->wValue & 0xFF);
+                retVal = USB_STATUS_OK;
+                break;
+            }
             break;
         }
         break;
