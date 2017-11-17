@@ -207,24 +207,39 @@ SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE) =
     MS_DS_S                         // The size of entire MS OS 2.0 descriptor set. The value shall match the value in the descriptor set information structure.
   },
   {
-    MS_CSH_S,                             // The length, in bytes, of this subset header. Shall be set to 8.
-    MS_OS_20_SUBSET_HEADER_CONFIGURATION, // MS_OS_20_SUBSET_HEADER_CONFIGURATION
-    0,                                    // The configuration value for the USB configuration to which this subset applies.
-    0,                                    // Shall be set to 0.
-    MS_CSH_S + MS_FSH_S + MS_CID_S        // The size of entire configuration subset including this header.
+    MS_CSH_S,                                 // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_OS_20_SUBSET_HEADER_CONFIGURATION,     // MS_OS_20_SUBSET_HEADER_CONFIGURATION
+    0,                                        // The configuration value for the USB configuration to which this subset applies.
+    0,                                        // Shall be set to 0.
+    MS_CSH_S + MS_FSH_S + MS_CID_S + MS_DIG_S // The size of entire configuration subset including this header.
   },
   {
     MS_FSH_S,                        // The length, in bytes, of this subset header. Shall be set to 8.
     MS_OS_20_SUBSET_HEADER_FUNCTION, // MS_OS_20_SUBSET_HEADER_FUNCTION
     0,                               // The interface number for the first interface of the function to which this subset applies.
     0,                               // Shall be set to 0.
-    MS_FSH_S + MS_CID_S              // The size of entire function subset including this header.
+    MS_FSH_S + MS_CID_S + MS_DIG_S   // The size of entire function subset including this header.
   },
   {
     MS_CID_S,                          // The length, bytes, of the compatible ID descriptor including value descriptors. Shall be set to 20.
     MS_OS_20_FEATURE_COMPATIBLE_ID,    // MS_OS_20_FEATURE_COMPATIBLE_ID
     {'W','I','N','U','S','B',  0,  0}, // Compatible ID String
     {  0,  0,  0,  0,  0,  0,  0,  0}  // Sub-compatible ID String
+  },
+  {
+    MS_DIG_S,                      // The length, in bytes, of this descriptor.
+    MS_OS_20_FEATURE_REG_PROPERTY, // MS_OS_20_FEATURE_REG_PROPERTY
+    MS_OS_20_REG_MULTI_SZ,         // The type of registry property. See Table 15. (REG_MULTI_SZ)
+    htole16(0x2A),                 // The length of the property name. (0x2A)
+    MS_OS_20_DEVICE_INT_GUID_NAME, // The name of registry property. ("DeviceInterfaceGUIDs")
+    htole16(0x50),                 // The length of property data.
+    {                              // Property data - GUID a74ea70e-6af5-4f72-a0c6-06d4f9390b27
+      '{',0x00, 'a',0x00, '7',0x00, '4',0x00, 'e',0x00, 'a',0x00, '7',0x00, '0',0x00,
+      'e',0x00, '-',0x00, '6',0x00, 'a',0x00, 'f',0x00, '5',0x00, '-',0x00, '4',0x00,
+      'f',0x00, '7',0x00, '2',0x00, '-',0x00, 'a',0x00, '0',0x00, 'c',0x00, '6',0x00,
+      '-',0x00, '0',0x00, '6',0x00, 'd',0x00, '4',0x00, 'f',0x00, '9',0x00, '3',0x00,
+      '9',0x00, '0',0x00, 'b',0x00, '2',0x00, '7',0x00, '}',0x00,0x00,0x00,0x00,0x00
+    }
   }
 };
 

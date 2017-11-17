@@ -150,48 +150,14 @@ void stepMacro()
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
-  FLADDR flashAddr = MACRO_FLASH_ADDR + (macroIndex * MACRO_BYTES);
-  FLASH_Write(flashAddr, (uint8_t *) macroData, MACRO_BYTES);
+  //FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
+  //FLASH_Write(flashAddr, (uint8_t *) saveIndex, MACRO_BYTES);
+  memcpy(macro, macroData, MACRO_BYTES);
 }
 
 void loadMacro()
 {
-  uint8_t i;
-
-  macro[0].actionType = 1;
-  macro[0].value = 0x04;
-  macro[1].actionType = 2;
-  macro[1].value = 0x04;
-  macro[2].actionType = 1;
-  macro[2].value = 0x16;
-  macro[3].actionType = 2;
-  macro[3].value = 0x16;
-  macro[4].actionType = 1;
-  macro[4].value = 0x17;
-  macro[5].actionType = 2;
-  macro[5].value = 0x17;
-  macro[6].actionType = 1;
-  macro[6].value = 0x15;
-  macro[7].actionType = 2;
-  macro[7].value = 0x15;
-  macro[8].actionType = 1;
-  macro[8].value = 0x12;
-  macro[9].actionType = 2;
-  macro[9].value = 0x12;
-  macro[10].actionType = 1;
-  macro[10].value = 0x0E;
-  macro[11].actionType = 2;
-  macro[11].value = 0x0E;
-  macro[12].actionType = 1;
-  macro[12].value = 0x08;
-  macro[13].actionType = 2;
-  macro[13].value = 0x08;
-  macro[14].actionType = 1;
-  macro[14].value = 0x1C;
-  macro[15].actionType = 2;
-  macro[15].value = 0x1C;
-
-  macroNumActions = 16;
+  //uint8_t i;
 
   //FLADDR flashAddr = MACRO_FLASH_ADDR + (macroIndex * MACRO_BYTES);
   //FLASH_Read((uint8_t *)macro, flashAddr, MACRO_BYTES);
