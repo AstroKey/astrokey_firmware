@@ -154,11 +154,7 @@ void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
   uint8_t i;
   FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
-  for (i = 0; i < MACRO_BYTES; i++)
-  {
-    FLASH_((uint8_t*) macroData)[i]
-  }
-  FLASH_Clear(flashAddr, MACRO_BYTES);
+  //FLASH_Clear(flashAddr, MACRO_BYTES);
   FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
 }
 
