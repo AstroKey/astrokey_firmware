@@ -19,7 +19,7 @@
 // Variables
 // ----------------------------------------------------------------------------
 uint8_t tmpBuffer;
-Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
+volatile int8_t macroTransfer = -1;
 
 // ----------------------------------------------------------------------------
 // Functions
@@ -199,27 +199,22 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
       && (setup->bmRequestType.Direction == USB_SETUP_DIR_OUT)
       && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
   {
-    // Check request platform
-    switch (setup->bRequest)
+    if (setup->bRequest == ASTROKEY_BREQUEST)
     {
-      // Astrokey platform request
-      case ASTROKEY_BREQUEST:
-        switch (setup->wIndex) // Request type
-        {
-          case ASTROKEY_SET_MACRO:
-            memset((void*) tmpMacro, 0, MACRO_BYTES);
-            USBD_Read(EP0,
-                      (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))macro,
-                      EFM8_MIN(MACRO_BYTES, setup->wLength),
-                      false);
+      switch (setup->wIndex) // Request type
+      {
+        case ASTROKEY_SET_MACRO:
+          memset((void*) tmpMacro, 0, MACRO_BYTES);
+          USBD_Read(EP0,
+                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
+                    EFM8_MIN(MACRO_BYTES, setup->wLength),
+                    true);
 
-            macroNumActions = setup->wLength / 2;
+          macroTransfer = setup->wValue;
 
-            saveMacro(tmpMacro, setup->wValue);
-            retVal = USB_STATUS_OK;
-            break;
-        }
-        break;
+          retVal = USB_STATUS_OK;
+          break;
+      }
     }
   }
   // Setup command: Standard request to interface in direction IN
@@ -365,15 +360,16 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr,
                              uint16_t xferred,
                              uint16_t remaining)
 {
+  UNREFERENCED_ARGUMENT(epAddr);
   UNREFERENCED_ARGUMENT(xferred);
   UNREFERENCED_ARGUMENT(remaining);
 
   if (status == USB_STATUS_OK)
   {
-    // The only output reported supported is the SetReport to enable
-    // Num Key and Caps Lock LED's.
-    if (epAddr == EP0)
+    if (macroTransfer != -1)
     {
+      macroUpdated = macroTransfer;
+      macroTransfer = -1;
     }
   }
 

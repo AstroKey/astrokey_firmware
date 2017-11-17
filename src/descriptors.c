@@ -264,7 +264,6 @@ SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myUsbStringTable_USEnglish[], static const U
   mfrDesc,
   prodDesc,
   serDesc,
-
 };
 //-----------------------------------------------------------------------------
 SI_SEGMENT_VARIABLE(initstruct,

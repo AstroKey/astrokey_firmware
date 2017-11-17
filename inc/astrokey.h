@@ -40,7 +40,7 @@ typedef struct {
   uint8_t value;
 } Macro_TypeDef;
 
-#define MACRO_MAX_SIZE 32
+#define MACRO_MAX_SIZE 10
 #define MACRO_MAX_KEYS 6
 #define MACRO_BYTES (MACRO_MAX_SIZE * sizeof(Macro_TypeDef))
 
@@ -51,5 +51,8 @@ void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex);
 
 extern Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
 extern uint8_t macroNumActions;
+
+extern Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
+extern volatile int8_t macroUpdated;
 
 #endif /* INC_ASTROKEY_H_ */

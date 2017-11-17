@@ -68,6 +68,8 @@ KeyReport_TypeDef keyReport =
 };
 
 volatile bool keyReportSent = false;
+volatile int8_t macroUpdated = -1;
+Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
 
 // The data of the current macro
 Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
@@ -150,28 +152,29 @@ void stepMacro()
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
-  //FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
-  //FLASH_Write(flashAddr, (uint8_t *) saveIndex, MACRO_BYTES);
-  memcpy(macro, macroData, MACRO_BYTES);
+  FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
+  FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
+  //memcpy(macro, macroData, MACRO_BYTES);
 }
 
 void loadMacro()
 {
-  //uint8_t i;
+  uint8_t i;
 
-  //FLADDR flashAddr = MACRO_FLASH_ADDR + (macroIndex * MACRO_BYTES);
-  //FLASH_Read((uint8_t *)macro, flashAddr, MACRO_BYTES);
 
-  //macroNumActions = MACRO_MAX_SIZE;
+  FLADDR flashAddr = MACRO_FLASH_ADDR + (macroIndex * MACRO_BYTES);
+  FLASH_Read((uint8_t *)macro, flashAddr, MACRO_BYTES);
 
-  //for (i = 0; i < MACRO_MAX_SIZE; i++)
-  //{
-  //  if (macro[i].actionType == 0)
-  //  {
-  //    macroNumActions = i;
-  //    break;
-  //  }
-  //}
+  macroNumActions = MACRO_MAX_SIZE;
+
+  for (i = 0; i < MACRO_MAX_SIZE; i++)
+  {
+    if (macro[i].actionType == 0)
+    {
+      macroNumActions = i;
+      break;
+    }
+  }
 }
 
 // Starts running a macro
@@ -192,7 +195,7 @@ uint8_t checkKey(uint8_t bitMask, uint8_t pressed)
 
   if (pressed)
   {
-    if (0 == wasPressed & bitMask)
+    if (0 == (wasPressed & bitMask))
       retVal = 1;
     wasPressed |= bitMask;
   }
@@ -219,11 +222,11 @@ uint8_t checkKey(uint8_t bitMask, uint8_t pressed)
 int16_t main(void)
 {
   enter_DefaultMode_from_RESET();
-  if (PRESSED(S0))
+  /*if (PRESSED(S0))
   {
     *((uint8_t SI_SEG_DATA *) 0x00) = 0xA5;
     RSTSRC = RSTSRC_SWRSF__SET | RSTSRC_PORSF__SET;
-  }
+  }*/
 
   while (1)
   {
@@ -242,6 +245,12 @@ int16_t main(void)
     // No macro running, scan switches
     else
     {
+      if (macroUpdated != -1)
+      {
+        saveMacro(tmpMacro, macroUpdated);
+        macroUpdated = -1;
+      }
+
       if (checkKey(1 << 0, PRESSED(S0)))
         startMacro(0);
       else if (checkKey(1 << 1, PRESSED(S1)))
