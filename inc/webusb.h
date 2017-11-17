@@ -84,10 +84,15 @@ typedef struct
 // MS OS 2.0 Request Types
 #define MS_OS_20_REQUEST_DESCRIPTOR 0x07
 
+// MS OS 2.0 Descriptor Types
 #define MS_OS_20_SET_HEADER_DESCRIPTOR       htole16(0x00)
 #define MS_OS_20_SUBSET_HEADER_CONFIGURATION htole16(0x01)
 #define MS_OS_20_SUBSET_HEADER_FUNCTION      htole16(0x02)
 #define MS_OS_20_FEATURE_COMPATIBLE_ID       htole16(0x03)
+#define MS_OS_20_FEATURE_REG_PROPERTY        htole16(0x04)
+
+// MS OS 2.0 Registry Property Data Types
+#define MS_OS_20_REG_MULTI_SZ                htole16(0x07)
 
 #define MS_OS_20_WINDOWS_VERSION htole32(0x06030000)
 
@@ -137,5 +142,22 @@ typedef struct
   uint8_t CompatibleID[8]; // Compatible ID String
   uint8_t SubCompatibleID[8]; // Sub-compatible ID String
 } MS_OS_20_CompatibleID_Descriptor_TypeDef;
+
+#define MS_OS_20_DEVICE_INT_GUID_NAME { \
+  'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00, 'c', 0x00, 'e', 0x00, \
+  'I', 0x00, 'n', 0x00, 't', 0x00, 'e', 0x00, 'r', 0x00, 'f', 0x00, 'a', 0x00, 'c', 0x00, 'e', 0x00, \
+  'G', 0x00, 'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00, 0x00, 0x00 \
+}
+
+typedef struct
+{
+  uint16_t wLength;             // The length, in bytes, of this header.
+  uint16_t wDescriptorType;     // MS_OS_20_FEATURE_REG_PROPERTY
+  uint16_t wPropertyDataType;   // REG_MULTI_SZ
+  uint16_t wPropertyNameLength; // 0x2A
+  uint8_t bPropertyName[0x2A];  // "DeviceInterfaceGUIDs"
+  uint16_t wPropertyDataLength; // 0x50
+  uint8_t bPropertyData[0x50];  // Device Interface GUID (string)
+} MS_OS_20_DeviceIntGUID_TypeDef;
 
 #endif /* INC_WEBUSB_H_ */

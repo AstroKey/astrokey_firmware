@@ -44,34 +44,34 @@ SI_SEGMENT_VARIABLE(ReportDescriptor0[69],
   0x05, 0x07,                      // USAGE_PAGE (Keyboard)
   0x19, 0xe0,                      // USAGE_MINIMUM (Keyboard LeftControl)
   0x29, 0xe7,                      // USAGE_MAXIMUM (Keyboard Right GUI)
-  0x15, 0x00,                      // LOGICAL_MINIMUM (0)
-  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)
-  0x75, 0x01,                      // REPORT_SIZE (1)
-  0x95, 0x08,                      // REPORT_COUNT (8)
-  0x81, 0x02,                      // INPUT (Data,Var,Abs)
-  0x15, 0x00,                      // LOGICAL_MINIMUM (0)
-  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)
-  0x75, 0x01,                      // REPORT_SIZE (1)
-  0x95, 0x08,                      // REPORT_COUNT (8)
-  0x81, 0x01,                      // INPUT (Cnst,Ary,Abs)
-  0x19, 0x00,                      // USAGE_MINIMUM (Reserved (no event indicated))
-  0x29, 0x65,                      // USAGE_MAXIMUM (Keyboard Application)
-  0x15, 0x00,                      // LOGICAL_MINIMUM (0)
-  0x25, 0x65,                      // LOGICAL_MAXIMUM (101)
-  0x75, 0x08,                      // REPORT_SIZE (8)
-  0x95, 0x06,                      // REPORT_COUNT (6)
-  0x81, 0x00,                      // INPUT (Data,Ary,Abs)
-  0x05, 0x08,                      // USAGE_PAGE (LEDs)
-  0x19, 0x01,                      // USAGE_MINIMUM (Num Lock)
-  0x29, 0x03,                      // USAGE_MAXIMUM (Scroll Lock)
-  0x15, 0x00,                      // LOGICAL_MINIMUM (0)
-  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)
-  0x75, 0x01,                      // REPORT_SIZE (1)
-  0x95, 0x03,                      // REPORT_COUNT (3)
-  0x91, 0x02,                      // OUTPUT (Data,Var,Abs)
-  0x75, 0x01,                      // REPORT_SIZE (1)
-  0x95, 0x05,                      // REPORT_COUNT (5)
-  0x91, 0x01,                      // OUTPUT (Cnst,Ary,Abs)
+  0x15, 0x00,                      // LOGICAL_MINIMUM (0)  // Modifiers
+  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)  // Modifiers
+  0x75, 0x01,                      // REPORT_SIZE (1)      // Modifiers
+  0x95, 0x08,                      // REPORT_COUNT (8)     // Modifiers
+  0x81, 0x02,                      // INPUT (Data,Var,Abs) // Modifiers
+  0x15, 0x00,                      // LOGICAL_MINIMUM (0)  // Reserved
+  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)  // Reserved
+  0x75, 0x01,                      // REPORT_SIZE (1)      // Reserved
+  0x95, 0x08,                      // REPORT_COUNT (8)     // Reserved
+  0x81, 0x01,                      // INPUT (Cnst,Ary,Abs) // Reserved
+  0x19, 0x00,                      // USAGE_MINIMUM (Reserved (no event indicated))  // Keys
+  0x29, 0x65,                      // USAGE_MAXIMUM (Keyboard Application)           // Keys
+  0x15, 0x00,                      // LOGICAL_MINIMUM (0)                            // Keys
+  0x25, 0x65,                      // LOGICAL_MAXIMUM (101)                          // Keys
+  0x75, 0x08,                      // REPORT_SIZE (8)                                // Keys
+  0x95, 0x06,                      // REPORT_COUNT (6)                               // Keys
+  0x81, 0x00,                      // INPUT (Data,Ary,Abs)                           // Keys
+  0x05, 0x08,                      // USAGE_PAGE (LEDs)           // LEDs
+  0x19, 0x01,                      // USAGE_MINIMUM (Num Lock)    // LEDs
+  0x29, 0x03,                      // USAGE_MAXIMUM (Scroll Lock) // LEDs
+  0x15, 0x00,                      // LOGICAL_MINIMUM (0)         // LEDs
+  0x25, 0x01,                      // LOGICAL_MAXIMUM (1)         // LEDs
+  0x75, 0x01,                      // REPORT_SIZE (1)             // LEDs
+  0x95, 0x03,                      // REPORT_COUNT (3)            // LEDs
+  0x91, 0x02,                      // OUTPUT (Data,Var,Abs)       // LEDs
+  0x75, 0x01,                      // REPORT_SIZE (1)             // Padding
+  0x95, 0x05,                      // REPORT_COUNT (5)            // Padding
+  0x91, 0x01,                      // OUTPUT (Cnst,Ary,Abs)       // Padding
   0xc0                             // END_COLLECTION
 
 };
@@ -83,7 +83,7 @@ SI_SEGMENT_VARIABLE(deviceDesc[],
   USB_DEVICE_DESCSIZE,             // bLength
   USB_DEVICE_DESCRIPTOR,           // bLength
   htole16(0x0210),                 // bcdUSB
-  0,                               // bDeviceClass
+  0,                               // bDeviceClass (classes defined in interface descriptors)
   0,                               // bDeviceSubClass
   0,                               // bDeviceProtocol
   64,                              // bMaxPacketSize
@@ -102,9 +102,9 @@ SI_SEGMENT_VARIABLE(configDesc[],
 {
   USB_CONFIG_DESCSIZE,             // bLength
   USB_CONFIG_DESCRIPTOR,           // bDescriptorType
-  0x22,                            // wTotalLength(LSB)
+  0x2B,                            // wTotalLength(LSB)
   0x00,                            // wTotalLength(MSB)
-  1,                               // bNumInterfaces
+  2,                               // bNumInterfaces
   1,                               // bConfigurationValue
   0,                               // iConfiguration
 
@@ -116,6 +116,17 @@ SI_SEGMENT_VARIABLE(configDesc[],
   USB_INTERFACE_DESCSIZE,          // bLength
   USB_INTERFACE_DESCRIPTOR,        // bDescriptorType
   0,                               // bInterfaceNumber
+  0,                               // bAlternateSetting
+  0,                               // bNumEndpoints
+  0xFF,                            // bInterfaceClass: Vendor Specific
+  0,                               // bInterfaceSubClass
+  0,                               // bInterfaceProtocol
+  0,                               // iInterface
+
+  //Interface 1 Descriptor
+  USB_INTERFACE_DESCSIZE,          // bLength
+  USB_INTERFACE_DESCRIPTOR,        // bDescriptorType
+  1,                               // bInterfaceNumber
   0,                               // bAlternateSetting
   1,                               // bNumEndpoints
   3,                               // bInterfaceClass: HID (Human Interface Device)
@@ -141,38 +152,7 @@ SI_SEGMENT_VARIABLE(configDesc[],
   USB_EPTYPE_INTR,                 // bAttrib
   0x40,                            // wMaxPacketSize (LSB)
   0x00,                            // wMaxPacketSize (MSB)
-  24,                              // bInterval
-  /*
-  //Interface 1 Descriptor
-  USB_INTERFACE_DESCSIZE,          // bLength
-  USB_INTERFACE_DESCRIPTOR,        // bDescriptorType
-  1,                               // bInterfaceNumber
-  0,                               // bAlternateSetting
-  1,                               // bNumEndpoints
-  3,                               // bInterfaceClass: HID (Human Interface Device)
-  0,                               // bInterfaceSubClass (0 = not bootable)
-  0,                               // bInterfaceProtocol (0 = none)
-  0,                               // iInterface
-
-  //HID Descriptor
-  USB_HID_DESCSIZE,                // bLength
-  USB_HID_DESCRIPTOR,              // bLength
-  0x11,                            // bcdHID (LSB)
-  0x01,                            // bcdHID (MSB)
-  0,                               // bCountryCode
-  1,                               // bNumDescriptors
-  USB_HID_REPORT_DESCRIPTOR,       // bDescriptorType
-  sizeof( ReportDescriptor0 ),     // wDescriptorLength(LSB)
-  sizeof( ReportDescriptor0 )>>8,  // wDescriptorLength(MSB)
-
-  //Endpoint 2 OUT Descriptor
-  USB_ENDPOINT_DESCSIZE,           // bLength
-  USB_ENDPOINT_DESCRIPTOR,         // bDescriptorType
-  USB_EP_DIR_OUT | 2,              // bEndpointAddress
-  USB_EPTYPE_INTR,                 // bAttrib
-  0x40,                            // wMaxPacketSize (LSB)
-  0x00,                            // wMaxPacketSize (MSB)
-  24,                              // bInterval*/
+  1,                               // bInterval
 };
 
 SI_SEGMENT_VARIABLE(bosDesc,
@@ -213,7 +193,7 @@ SI_SEGMENT_VARIABLE(bosDesc,
     MS_OS_20_DEVCAPABILITY_UUID,                     // Must be set to {D8DD60DF-4589-4CC7-9CD2-659D9E648A9F}.
     MS_OS_20_WINDOWS_VERSION,                        // Windows version
     htole16(sizeof(MS_OS_20_DescriptorSet_TypeDef)), // The length, in bytes of the MS OS 2.0 descriptor set.
-    MS_OS_20_REQEUST,                                // Vendor defined code to use to retrieve this version of the MS OS 2.0 descriptor and also to set alternate enumeration behavior on the device.
+    MS_OS_20_BREQEUST,                                // Vendor defined code to use to retrieve this version of the MS OS 2.0 descriptor and also to set alternate enumeration behavior on the device.
     0                                                // A non-zero value to send to the device to indicate that the device may return non-default USB descriptors for enumeration.
   }
 };
@@ -227,24 +207,39 @@ SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE) =
     MS_DS_S                         // The size of entire MS OS 2.0 descriptor set. The value shall match the value in the descriptor set information structure.
   },
   {
-    MS_CSH_S,                             // The length, in bytes, of this subset header. Shall be set to 8.
-    MS_OS_20_SUBSET_HEADER_CONFIGURATION, // MS_OS_20_SUBSET_HEADER_CONFIGURATION
-    0,                                    // The configuration value for the USB configuration to which this subset applies.
-    0,                                    // Shall be set to 0.
-    MS_CSH_S + MS_FSH_S + MS_CID_S        // The size of entire configuration subset including this header.
+    MS_CSH_S,                                 // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_OS_20_SUBSET_HEADER_CONFIGURATION,     // MS_OS_20_SUBSET_HEADER_CONFIGURATION
+    0,                                        // The configuration value for the USB configuration to which this subset applies.
+    0,                                        // Shall be set to 0.
+    MS_CSH_S + MS_FSH_S + MS_CID_S + MS_DIG_S // The size of entire configuration subset including this header.
   },
   {
-    MS_FSH_S,         // The length, in bytes, of this subset header. Shall be set to 8.
+    MS_FSH_S,                        // The length, in bytes, of this subset header. Shall be set to 8.
     MS_OS_20_SUBSET_HEADER_FUNCTION, // MS_OS_20_SUBSET_HEADER_FUNCTION
-    0,  // The interface number for the first interface of the function to which this subset applies.
-    0,        // Shall be set to 0.
-    MS_FSH_S + MS_CID_S   // The size of entire function subset including this header.
+    0,                               // The interface number for the first interface of the function to which this subset applies.
+    0,                               // Shall be set to 0.
+    MS_FSH_S + MS_CID_S + MS_DIG_S   // The size of entire function subset including this header.
   },
   {
     MS_CID_S,                          // The length, bytes, of the compatible ID descriptor including value descriptors. Shall be set to 20.
     MS_OS_20_FEATURE_COMPATIBLE_ID,    // MS_OS_20_FEATURE_COMPATIBLE_ID
     {'W','I','N','U','S','B',  0,  0}, // Compatible ID String
     {  0,  0,  0,  0,  0,  0,  0,  0}  // Sub-compatible ID String
+  },
+  {
+    MS_DIG_S,                      // The length, in bytes, of this descriptor.
+    MS_OS_20_FEATURE_REG_PROPERTY, // MS_OS_20_FEATURE_REG_PROPERTY
+    MS_OS_20_REG_MULTI_SZ,         // The type of registry property. See Table 15. (REG_MULTI_SZ)
+    htole16(0x2A),                 // The length of the property name. (0x2A)
+    MS_OS_20_DEVICE_INT_GUID_NAME, // The name of registry property. ("DeviceInterfaceGUIDs")
+    htole16(0x50),                 // The length of property data.
+    {                              // Property data - GUID a74ea70e-6af5-4f72-a0c6-06d4f9390b27
+      '{',0x00, 'a',0x00, '7',0x00, '4',0x00, 'e',0x00, 'a',0x00, '7',0x00, '0',0x00,
+      'e',0x00, '-',0x00, '6',0x00, 'a',0x00, 'f',0x00, '5',0x00, '-',0x00, '4',0x00,
+      'f',0x00, '7',0x00, '2',0x00, '-',0x00, 'a',0x00, '0',0x00, 'c',0x00, '6',0x00,
+      '-',0x00, '0',0x00, '6',0x00, 'd',0x00, '4',0x00, 'f',0x00, '9',0x00, '3',0x00,
+      '9',0x00, '0',0x00, 'b',0x00, '2',0x00, '7',0x00, '}',0x00,0x00,0x00,0x00,0x00
+    }
   }
 };
 
@@ -269,7 +264,6 @@ SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myUsbStringTable_USEnglish[], static const U
   mfrDesc,
   prodDesc,
   serDesc,
-
 };
 //-----------------------------------------------------------------------------
 SI_SEGMENT_VARIABLE(initstruct,
@@ -282,8 +276,8 @@ SI_SEGMENT_VARIABLE(initstruct,
   sizeof(myUsbStringTable_USEnglish) / sizeof(myUsbStringTable_USEnglish[0])                            // numberOfStrings
 };
 
-#define URL0_STRING    'w','i','k','i','p','e','d','i','a','.','c','o','m','\0'
-#define URL0_SIZE      14
+#define URL0_STRING    'a','s','t','r','o','k','e','y','.','g','i','t','h','u','b','.','i','o'
+#define URL0_SIZE      18
 
 URL_DESC( landingPage[] , URL0_SIZE, WEBUSB_SCHEME_HTTPS, URL0_STRING);
 

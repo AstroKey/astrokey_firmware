@@ -8,8 +8,8 @@
 #include "efm8_usb.h"
 #include "descriptors.h"
 #include "idle.h"
-#include "bsp.h"
 #include "webusb.h"
+#include "astrokey.h"
 
 // ----------------------------------------------------------------------------
 // Constants
@@ -19,6 +19,7 @@
 // Variables
 // ----------------------------------------------------------------------------
 uint8_t tmpBuffer;
+volatile int8_t macroTransfer = -1;
 
 // ----------------------------------------------------------------------------
 // Functions
@@ -45,14 +46,25 @@ void USBD_ResetCb(void)
 #if SLAB_USB_SOF_CB
 void USBD_SofCb(uint16_t sofNr)
 {
+  int8_t status;
   UNREFERENCED_ARGUMENT(sofNr);
 
   idleTimerTick();
 
   // Check if the device should send a report
-  if (isIdleTimerExpired() == true)
+  // if (isIdleTimerExpired() == true || !keyReportSent)
+  if (!keyReportSent)
   {
+    status = USBD_Write(KEYBOARD_IN_EP_ADDR,
+                        (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&keyReport,
+                        sizeof(KeyReport_TypeDef),
+                        false);
+    if (status == USB_STATUS_OK)
+      keyReportSent = true;
   }
+
+
+
 }
 #endif // SLAB_USB_SOF_CB
 
@@ -75,7 +87,7 @@ void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
   }
   else if (newState == USBD_STATE_CONFIGURED)
   {
-    idleTimerSet(POLL_RATE);
+    idleSetDuration(POLL_RATE_MS);
   }
 
   // Exiting suspend mode, power internal and external blocks up
@@ -130,17 +142,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               break;
           }
         }
-        /*else if ((setup->wValue >> 8) == USB_STRING_DESCRIPTOR)
-	{
-	  if (index == 0xEE)
-	  {
-            USBD_Write(EP0,
-		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))wcidDesc,
-		       EFM8_MIN(wcidDesc[0], setup->wLength),
-		       false);
-            retVal = USB_STATUS_OK;
-	  }
-	}*/
         break;
       default:
         break;
@@ -154,6 +155,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
     // Check request platform
     switch (setup->bRequest)
     {
+
       // WebUSB platform request
       case WEBUSB_BREQUEST:
         // Check request type
@@ -174,22 +176,61 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         }
         break;
       // MS OS 2.0 platform request
-      case MS_OS_20_REQEUST:
-	// Check request type
-	switch (setup->wIndex)
-	{
-	  // Get descriptor type
-	  case MS_OS_20_REQUEST_DESCRIPTOR:
-	    USBD_Write(EP0,
-		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&msDesc,
-		       EFM8_MIN(MS_DS_S, setup->wLength),
-		       false);
-	    retVal = USB_STATUS_OK;
-	    break;
-	}
-	break;
+      case MS_OS_20_BREQEUST:
+        // Check request type
+        switch (setup->wIndex)
+        {
+          // Get descriptor type
+          case MS_OS_20_REQUEST_DESCRIPTOR:
+            USBD_Write(EP0,
+        	       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&msDesc,
+        	       EFM8_MIN(MS_DS_S, setup->wLength),
+        	       false);
+            retVal = USB_STATUS_OK;
+            break;
+        }
+        break;
+      case ASTROKEY_BREQUEST:
+        switch (setup->wIndex)
+        {
+          // Read macro off device
+          case ASTROKEY_GET_MACRO:
+            loadMacro(tmpMacro, setup->wValue);
+
+            USBD_Write(EP0,
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
+                       EFM8_MIN(MACRO_BYTES, setup->wLength),
+                       false);
+
+            retVal = USB_STATUS_OK;
+            break;
+        }
+        break;
       default:
 	break;
+    }
+  }
+  // Setup Command: Vendor request to device in direction OUT
+  else if ((setup->bmRequestType.Type == USB_SETUP_TYPE_VENDOR)
+      && (setup->bmRequestType.Direction == USB_SETUP_DIR_OUT)
+      && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
+  {
+    if (setup->bRequest == ASTROKEY_BREQUEST)
+    {
+      switch (setup->wIndex) // Request type
+      {
+        case ASTROKEY_SET_MACRO:
+          memset((void*) tmpMacro, 0, MACRO_BYTES);
+          USBD_Read(EP0,
+                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
+                    EFM8_MIN(MACRO_BYTES, setup->wLength),
+                    true);
+
+          macroTransfer = setup->wValue;
+
+          retVal = USB_STATUS_OK;
+          break;
+      }
     }
   }
   // Setup command: Standard request to interface in direction IN
@@ -206,7 +247,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 0: // Language 0
+            case 1: // Interface 1
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))ReportDescriptor0,
@@ -215,7 +256,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               retVal = USB_STATUS_OK;
               break;
 
-            default: // Unhandled Language
+            default: // Unhandled Interface
               break;
           }
         }
@@ -223,7 +264,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 0: // Language 0
+            case 1: // Interface 1
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&configDesc[18]),
@@ -232,7 +273,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
               retVal = USB_STATUS_OK;
               break;
 
-            default: // Unhandled Language
+            default: // Unhandled Interface
               break;
           }
         }
@@ -247,7 +288,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
     // Implement the necessary HID class specific commands.
     switch (setup->bRequest)
     {
-      case USB_HID_SET_REPORT:
+      /*case USB_HID_SET_REPORT:
         if (((setup->wValue >> 8) == 2)               // Output report
             && ((setup->wValue & 0xFF) == 0)          // Report ID
             && (setup->wLength == 1)                  // Report length
@@ -257,7 +298,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
           // LEDs
           retVal = USB_STATUS_OK;
         }
-        break;
+        break;*/
 
       case USB_HID_GET_REPORT:
         if (((setup->wValue >> 8) == 1)               // Input report
@@ -265,11 +306,13 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 8)                  // Report length
             && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
         {
-          //USBD_Write(EP0,
-          //           (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&noKeyReport,
-          //           sizeof(KeyReport_TypeDef),
-          //           false);
-          //retVal = USB_STATUS_OK;
+          USBD_Write(KEYBOARD_IN_EP_ADDR,
+                     (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&keyReport,
+                     sizeof(KeyReport_TypeDef),
+                     false);
+          keyReportSent = true;
+
+          retVal = USB_STATUS_OK;
         }
         break;
 
@@ -278,7 +321,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 0)
             && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
         {
-          idleTimerSet(setup->wValue >> 8);
+          idleSetDuration(setup->wValue >> 8);
           retVal = USB_STATUS_OK;
         }
         break;
@@ -288,7 +331,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
             && (setup->wLength == 1)
             && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
         {
-          tmpBuffer = idleGetRate();
+          tmpBuffer = idleGetDuration();
           USBD_Write(EP0, &tmpBuffer, 1, false);
           retVal = USB_STATUS_OK;
         }
@@ -333,15 +376,16 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr,
                              uint16_t xferred,
                              uint16_t remaining)
 {
+  UNREFERENCED_ARGUMENT(epAddr);
   UNREFERENCED_ARGUMENT(xferred);
   UNREFERENCED_ARGUMENT(remaining);
 
   if (status == USB_STATUS_OK)
   {
-    // The only output reported supported is the SetReport to enable
-    // Num Key and Caps Lock LED's.
-    if (epAddr == EP0)
+    if (macroTransfer != -1)
     {
+      macroUpdated = macroTransfer;
+      macroTransfer = -1;
     }
   }
 
