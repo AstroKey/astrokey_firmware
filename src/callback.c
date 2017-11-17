@@ -177,19 +177,35 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         break;
       // MS OS 2.0 platform request
       case MS_OS_20_BREQEUST:
-	// Check request type
-	switch (setup->wIndex)
-	{
-	  // Get descriptor type
-	  case MS_OS_20_REQUEST_DESCRIPTOR:
-	    USBD_Write(EP0,
-		       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&msDesc,
-		       EFM8_MIN(MS_DS_S, setup->wLength),
-		       false);
-	    retVal = USB_STATUS_OK;
-	    break;
-	}
-	break;
+        // Check request type
+        switch (setup->wIndex)
+        {
+          // Get descriptor type
+          case MS_OS_20_REQUEST_DESCRIPTOR:
+            USBD_Write(EP0,
+        	       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&msDesc,
+        	       EFM8_MIN(MS_DS_S, setup->wLength),
+        	       false);
+            retVal = USB_STATUS_OK;
+            break;
+        }
+        break;
+      case ASTROKEY_BREQUEST:
+        switch (setup->wIndex)
+        {
+          // Read macro off device
+          case ASTROKEY_GET_MACRO:
+            loadMacro(tmpMacro, setup->wValue);
+
+            USBD_Write(EP0,
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
+                       EFM8_MIN(MACRO_BYTES, setup->wLength),
+                       false);
+
+            retVal = USB_STATUS_OK;
+            break;
+        }
+        break;
       default:
 	break;
     }

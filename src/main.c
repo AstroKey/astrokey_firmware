@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // main.c
 //-----------------------------------------------------------------------------
-// Copyright 2014 Silicon Laboratories, Inc.
+// Copyri999ght 2014 Silicon Laboratories, Inc.
 // http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
 //
 // Program Description:
@@ -50,7 +50,7 @@
 #include "idle.h"
 #include "InitDevice.h"
 #include "astrokey.h"
-#include "EFM8UB1_FlashUtils.h"
+#include "EFM8UB1_FlashPrimitives.h"
 
 #include <stdint.h>
 
@@ -152,24 +152,29 @@ void stepMacro()
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
+  uint8_t i;
   FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
+  for (i = 0; i < MACRO_BYTES; i++)
+  {
+    FLASH_((uint8_t*) macroData)[i]
+  }
+  FLASH_Clear(flashAddr, MACRO_BYTES);
   FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
-  //memcpy(macro, macroData, MACRO_BYTES);
 }
 
-void loadMacro()
+void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex)
 {
   uint8_t i;
 
 
-  FLADDR flashAddr = MACRO_FLASH_ADDR + (macroIndex * MACRO_BYTES);
-  FLASH_Read((uint8_t *)macro, flashAddr, MACRO_BYTES);
+  FLADDR flashAddr = MACRO_FLASH_ADDR + (loadIndex * MACRO_BYTES);
+  FLASH_Read((uint8_t *)macroData, flashAddr, MACRO_BYTES);
 
   macroNumActions = MACRO_MAX_SIZE;
 
   for (i = 0; i < MACRO_MAX_SIZE; i++)
   {
-    if (macro[i].actionType == 0)
+    if (macroData[i].actionType == 0)
     {
       macroNumActions = i;
       break;
@@ -183,7 +188,7 @@ void startMacro(uint8_t index)
   macroIndex = index;
   actionIndex = 0;
 
-  loadMacro();
+  loadMacro(macro, index);
   stepMacro();
 }
 

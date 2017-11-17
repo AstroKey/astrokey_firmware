@@ -15,9 +15,10 @@
 
 // wIndex values
 #define ASTROKEY_SET_MACRO 0x01
+#define ASTROKEY_GET_MACRO 0x02
 
 // Switch configuration
-#define NUM_SWITCHES 5
+#define NUM_SWITCHES 2
 #define S0 P0_B0
 #define S1 P0_B1
 #define S2 P0_B2
@@ -48,6 +49,7 @@ typedef struct {
 #define MACRO_FLASH_ADDR (BOOTLOADER_START_ADDR - (NUM_SWITCHES * MACRO_BYTES))
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex);
+void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex);
 
 extern Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
 extern uint8_t macroNumActions;
