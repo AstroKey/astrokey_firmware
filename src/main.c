@@ -50,7 +50,7 @@
 #include "idle.h"
 #include "InitDevice.h"
 #include "astrokey.h"
-#include "EFM8UB1_FlashPrimitives.h"
+#include "EFM8UB1_FlashUtils.h"
 
 #include <stdint.h>
 
