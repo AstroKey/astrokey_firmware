@@ -50,6 +50,7 @@
 #include "idle.h"
 #include "InitDevice.h"
 #include "astrokey.h"
+#include "EFM8UB1_FlashPrimitives.h"
 #include "EFM8UB1_FlashUtils.h"
 
 #include <stdint.h>
@@ -73,8 +74,6 @@ Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
 
 // The data of the current macro
 Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
-// Number of actions in current macro
-uint8_t macroNumActions = 0;
 
 // Index of current macro running (i.e. 0 for 1st key, etc.)
 uint8_t macroIndex = NO_MACRO;
@@ -144,7 +143,7 @@ void stepMacro()
   keyReportSent = false;
 
   actionIndex++;
-  if (actionIndex == macroNumActions)
+  if (actionType == 0x00 || actionIndex == MACRO_MAX_SIZE)
   {
     macroIndex = NO_MACRO;
   }
@@ -152,29 +151,17 @@ void stepMacro()
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
+  uint8_t i;
   FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
-  //FLASH_Clear(flashAddr, MACRO_BYTES);
+  for (i = 0; i < MACRO_PAGES; i++)
+    FLASH_PageErase(flashAddr + (USER_PAGE_SIZE * i));
   FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
 }
 
 void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex)
 {
-  uint8_t i;
-
-
   FLADDR flashAddr = MACRO_FLASH_ADDR + (loadIndex * MACRO_BYTES);
   FLASH_Read((uint8_t *)macroData, flashAddr, MACRO_BYTES);
-
-  macroNumActions = MACRO_MAX_SIZE;
-
-  for (i = 0; i < MACRO_MAX_SIZE; i++)
-  {
-    if (macroData[i].actionType == 0)
-    {
-      macroNumActions = i;
-      break;
-    }
-  }
 }
 
 // Starts running a macro

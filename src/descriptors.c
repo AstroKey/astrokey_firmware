@@ -89,7 +89,7 @@ SI_SEGMENT_VARIABLE(deviceDesc[],
   64,                              // bMaxPacketSize
   USB_VENDOR_ID,                   // idVendor
   USB_PRODUCT_ID,                  // idProduct
-  htole16(0x0001),                 // bcdDevice
+  htole16(0x0002),                 // bcdDevice
   1,                               // iManufacturer
   2,                               // iProduct
   3,                               // iSerialNumber
