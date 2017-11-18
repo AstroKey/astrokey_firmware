@@ -50,6 +50,7 @@
 #include "idle.h"
 #include "InitDevice.h"
 #include "astrokey.h"
+#include "EFM8UB1_FlashPrimitives.h"
 #include "EFM8UB1_FlashUtils.h"
 
 #include <stdint.h>
@@ -153,7 +154,7 @@ void stepMacro()
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
 {
   FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
-  //FLASH_Clear(flashAddr, MACRO_BYTES);
+  FLASH_PageErase(MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES));
   FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
 }
 

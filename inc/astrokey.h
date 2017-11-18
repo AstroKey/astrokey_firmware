@@ -18,7 +18,7 @@
 #define ASTROKEY_GET_MACRO 0x02
 
 // Switch configuration
-#define NUM_SWITCHES 2
+#define NUM_SWITCHES 5
 #define S0 P0_B0
 #define S1 P0_B1
 #define S2 P0_B2
@@ -41,12 +41,20 @@ typedef struct {
   uint8_t value;
 } Macro_TypeDef;
 
-#define MACRO_MAX_SIZE 10
-#define MACRO_MAX_KEYS 6
-#define MACRO_BYTES (MACRO_MAX_SIZE * sizeof(Macro_TypeDef))
+// User data flash
+#define USER_PAGE_SIZE  64
+#define USER_START_ADDR 0xF800
 
-#define BOOTLOADER_START_ADDR 0x1A00
-#define MACRO_FLASH_ADDR (BOOTLOADER_START_ADDR - (NUM_SWITCHES * MACRO_BYTES))
+// Number of pages per macro
+#define MACRO_PAGES 2
+// Number of bytes per macro
+#define MACRO_BYTES (MACRO_PAGES * USER_PAGE_SIZE)
+// Maximum number of actions in a macro
+#define MACRO_MAX_SIZE ((MACRO_BYTES) / sizeof(Macro_TypeDef))
+// Max number of keys simultaenously held by macro
+#define MACRO_MAX_KEYS 6
+
+#define MACRO_FLASH_ADDR USER_START_ADDR
 
 void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex);
 void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex);
