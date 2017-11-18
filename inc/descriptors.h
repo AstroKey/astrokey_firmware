@@ -42,7 +42,7 @@ extern "C"
 #define KEYBOARD_IN_EP_ADDR   EP1IN
 
 // Interface number of the HID keyboard
-#define HID_KEYBOARD_IFC                  0
+#define HID_KEYBOARD_IFC                  1
 
 // Keyboard Report
   typedef struct
