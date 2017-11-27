@@ -247,7 +247,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 1: // Interface 1
+            case HID_KEYBOARD_IFC: // HID Interface
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))ReportDescriptor0,
@@ -264,8 +264,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 1: // Interface 1
-
+            case HID_KEYBOARD_IFC: // HID Interface
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&configDesc[18]),
                          EFM8_MIN(USB_HID_DESCSIZE, setup->wLength),
