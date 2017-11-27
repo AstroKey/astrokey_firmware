@@ -61,7 +61,7 @@
 // Number of keys currently being pressed by the macro
 uint8_t keysPressed = 0;
 // The current report to send the
-KeyReport_TypeDef keyReport =
+volatile KeyReport_TypeDef keyReport =
 {
   0,
   0,
@@ -103,6 +103,14 @@ void pressKey(uint8_t key)
     keyReport.keys[keysPressed] = key;
     keysPressed++;
   }
+  // Switch case seems to use 1 more byte of code than cascaded if else ifs with many conditions,
+  // but runs faster
+  switch (key)
+  {
+    case USAGE_LEFTSHIFT:
+      keyReport.modifiers |= MODIFIER_LEFTSHIFT;
+      break;
+  }
 }
 
 // Releases a key currently being pressed
@@ -111,15 +119,17 @@ void releaseKey(uint8_t key)
   uint8_t keyIndex;
   if ((keyIndex = keyIsPressed(key)) != -1)
   {
-    if (keysPressed == MACRO_MAX_KEYS)
-    {
-      keyReport.keys[MACRO_MAX_KEYS - 1] = 0;
-    }
-    else
-    {
-      keyReport.keys[keyIndex] = keyReport.keys[keysPressed - 1];
-    }
+    // Switch last key pressed to position of key being released
+    keyReport.keys[keyIndex] = keyReport.keys[keysPressed - 1];
+    // Release last key
+    keyReport.keys[keysPressed - 1] = 0;
     keysPressed--;
+  }
+  switch (key)
+  {
+    case USAGE_LEFTSHIFT:
+      keyReport.modifiers &= ~MODIFIER_LEFTSHIFT;
+      break;
   }
 }
 
@@ -131,12 +141,10 @@ void stepMacro()
   switch (actionType)
   {
     case MACRO_ACTION_DOWN:
-      keyReport.keys[0] = value;
-      //pressKey(value);
+      pressKey(value);
       break;
     case MACRO_ACTION_UP:
-      keyReport.keys[0] = 0x00;
-      //releaseKey(value);
+      releaseKey(value);
       break;
   }
 

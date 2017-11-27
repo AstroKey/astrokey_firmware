@@ -52,7 +52,7 @@ extern "C"
     uint8_t keys[6];
   } KeyReport_TypeDef;
 
-extern KeyReport_TypeDef keyReport;
+extern volatile KeyReport_TypeDef keyReport;
 extern volatile bool keyReportSent;
 
 // bRequest number for WebUSB requests
