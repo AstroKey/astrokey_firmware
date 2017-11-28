@@ -107,8 +107,14 @@ void pressKey(uint8_t key)
   // but runs faster
   switch (key)
   {
+    case USAGE_LEFTCTRL:
+      keyReport.modifiers |= MODIFIER_LEFTCTRL;
+      break;
     case USAGE_LEFTSHIFT:
       keyReport.modifiers |= MODIFIER_LEFTSHIFT;
+      break;
+    case USAGE_LEFTALT:
+      keyReport.modifiers |= MODIFIER_LEFTALT;
       break;
   }
 }
@@ -127,8 +133,14 @@ void releaseKey(uint8_t key)
   }
   switch (key)
   {
+    case USAGE_LEFTCTRL:
+      keyReport.modifiers &= ~MODIFIER_LEFTCTRL;
+      break;
     case USAGE_LEFTSHIFT:
       keyReport.modifiers &= ~MODIFIER_LEFTSHIFT;
+      break;
+    case USAGE_LEFTALT:
+      keyReport.modifiers &= ~MODIFIER_LEFTALT;
       break;
   }
 }
