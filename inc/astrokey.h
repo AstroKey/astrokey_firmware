@@ -34,14 +34,18 @@
 // Macro action types
 #define MACRO_ACTION_DOWN  1
 #define MACRO_ACTION_UP    2
+#define MACRO_ACTION_PRESS 3
+#define MACRO_DELAY        16
 
 #define USAGE_LEFTCTRL  224
 #define USAGE_LEFTSHIFT 225
 #define USAGE_LEFTALT   226
+#define USAGE_LEFTGUI   227
 
 #define MODIFIER_LEFTCTRL  0x01
 #define MODIFIER_LEFTSHIFT 0x02
 #define MODIFIER_LEFTALT   0x04
+#define MODIFIER_LEFTGUI   0x08
 
 // Macro action struct
 typedef struct {

@@ -52,8 +52,8 @@ extern "C"
     uint8_t keys[6];
   } KeyReport_TypeDef;
 
-extern volatile KeyReport_TypeDef keyReport;
-extern volatile bool keyReportSent;
+  extern volatile KeyReport_TypeDef keyReport;
+  extern volatile bool keyReportSent;
 
 // bRequest number for WebUSB requests
 #define WEBUSB_BREQUEST                   1
@@ -65,23 +65,23 @@ extern volatile bool keyReportSent;
 #define ASTROKEY_BREQUEST                 3
 
 // BOS Descriptor + Platform Capability Descriptors
-typedef struct
-{
-  USB_BOSDescriptor_TypeDef bos;
-  USB20_ExtCapability_TypeDef ext;
-  WebUSB_DevCapability_TypeDef webCap;
-  MS_OS_20_DevCapability_TypeDef msCap;
-} USB_BOS_TypeDef;
+  typedef struct
+  {
+    USB_BOSDescriptor_TypeDef bos;
+    USB20_ExtCapability_TypeDef ext;
+    WebUSB_DevCapability_TypeDef webCap;
+    MS_OS_20_DevCapability_TypeDef msCap;
+  } USB_BOS_TypeDef;
 
 // Dumb Microsoft OS 2.0 Descriptor Set
-typedef struct
-{
-  MS_OS_20_DescSetHeader_TypeDef descSet;
-  MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
-  MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
-  MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
-  MS_OS_20_DeviceIntGUID_TypeDef devIntGUID;
-} MS_OS_20_DescriptorSet_TypeDef;
+  typedef struct
+  {
+    MS_OS_20_DescSetHeader_TypeDef descSet;
+    MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
+    MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
+    MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
+    MS_OS_20_DeviceIntGUID_TypeDef devIntGUID;
+  } MS_OS_20_DescriptorSet_TypeDef;
 
 // Sizes of MS OS 2.0 Descriptor Subsets
 #define MS_DSH_S htole16(sizeof(MS_OS_20_DescSetHeader_TypeDef))

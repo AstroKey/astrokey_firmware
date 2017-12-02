@@ -50,6 +50,7 @@
 #include "idle.h"
 #include "InitDevice.h"
 #include "astrokey.h"
+#include "delay.h"
 #include "EFM8UB1_FlashPrimitives.h"
 #include "EFM8UB1_FlashUtils.h"
 
@@ -116,6 +117,9 @@ void pressKey(uint8_t key)
     case USAGE_LEFTALT:
       keyReport.modifiers |= MODIFIER_LEFTALT;
       break;
+    case USAGE_LEFTGUI:
+      keyReport.modifiers |= MODIFIER_LEFTGUI;
+      break;
   }
 }
 
@@ -142,8 +146,15 @@ void releaseKey(uint8_t key)
     case USAGE_LEFTALT:
       keyReport.modifiers &= ~MODIFIER_LEFTALT;
       break;
+    case USAGE_LEFTGUI:
+      keyReport.modifiers &= ~MODIFIER_LEFTGUI;
+      break;
   }
 }
+
+bool curPressDown = false;
+bool delayStarted = false;
+uint32_t delayStartTime;
 
 // Advances the macro one action forward, ending it if the end is reached
 void stepMacro()
@@ -154,15 +165,41 @@ void stepMacro()
   {
     case MACRO_ACTION_DOWN:
       pressKey(value);
+      actionIndex++;
       break;
     case MACRO_ACTION_UP:
       releaseKey(value);
+      actionIndex++;
+      break;
+    case MACRO_ACTION_PRESS:
+      if (curPressDown)
+      {
+        releaseKey(value);
+        curPressDown = false;
+        actionIndex++;
+      }
+      else
+      {
+        pressKey(value);
+        curPressDown = true;
+      }
+      break;
+    case MACRO_DELAY:
+      if (!delayStarted)
+      {
+        delayStarted = true;
+        delayStartTime = getMillis();
+      }
+      else if ((getMillis() - delayStartTime) > ((uint32_t)value * 100))
+      {
+        delayStarted = false;
+        actionIndex++;
+      }
       break;
   }
 
   keyReportSent = false;
 
-  actionIndex++;
   if (actionType == 0x00 || actionIndex == MACRO_MAX_SIZE)
   {
     macroIndex = NO_MACRO;

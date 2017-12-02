@@ -10,6 +10,7 @@
 #include "idle.h"
 #include "webusb.h"
 #include "astrokey.h"
+#include "delay.h"
 
 // ----------------------------------------------------------------------------
 // Constants
@@ -20,6 +21,8 @@
 // ----------------------------------------------------------------------------
 uint8_t tmpBuffer;
 volatile int8_t macroTransfer = -1;
+
+uint32_t tmp32;
 
 // ----------------------------------------------------------------------------
 // Functions
@@ -203,6 +206,18 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
                        false);
 
             retVal = USB_STATUS_OK;
+            break;
+          case 0xF0:
+
+            tmp32 = getMillis();
+
+            USBD_Write(EP0,
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&tmp32,
+                       EFM8_MIN(sizeof(tmp32), setup->wLength),
+                       false);
+
+            retVal = USB_STATUS_OK;
+
             break;
         }
         break;
