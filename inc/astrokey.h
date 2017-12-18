@@ -35,7 +35,8 @@
 #define MACRO_ACTION_DOWN  1
 #define MACRO_ACTION_UP    2
 #define MACRO_ACTION_PRESS 3
-#define MACRO_DELAY        16
+#define MACRO_ACTION_DELAY 16
+#define MACRO_ACTION_PAUSE 255 // Pauses a macro until key release
 
 #define USAGE_LEFTCTRL  224
 #define USAGE_LEFTSHIFT 225

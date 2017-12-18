@@ -80,7 +80,7 @@ Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
 uint8_t macroIndex = NO_MACRO;
 
 // Index of current action in current macro running;
-uint8_t actionIndex = 0;
+uint8_t actionIndices[NUM_SWITCHES] = {0};
 
 // Checks if a key is currently pressed by the macro
 // Returns the index of the key in array of keys currently pressed,
@@ -159,24 +159,24 @@ uint32_t delayStartTime;
 // Advances the macro one action forward, ending it if the end is reached
 void stepMacro()
 {
-  uint8_t actionType = macro[actionIndex].actionType;
-  uint8_t value = macro[actionIndex].value;
+  uint8_t actionType = macro[actionIndices[macroIndex]].actionType;
+  uint8_t value = macro[actionIndices[macroIndex]].value;
   switch (actionType)
   {
     case MACRO_ACTION_DOWN:
       pressKey(value);
-      actionIndex++;
+      actionIndices[macroIndex]++;
       break;
     case MACRO_ACTION_UP:
       releaseKey(value);
-      actionIndex++;
+      actionIndices[macroIndex]++;
       break;
     case MACRO_ACTION_PRESS:
       if (curPressDown)
       {
         releaseKey(value);
         curPressDown = false;
-        actionIndex++;
+        actionIndices[macroIndex]++;
       }
       else
       {
@@ -184,7 +184,7 @@ void stepMacro()
         curPressDown = true;
       }
       break;
-    case MACRO_DELAY:
+    case MACRO_ACTION_DELAY:
       if (!delayStarted)
       {
         delayStarted = true;
@@ -193,15 +193,21 @@ void stepMacro()
       else if ((getMillis() - delayStartTime) > ((uint32_t)value * 100))
       {
         delayStarted = false;
-        actionIndex++;
+        actionIndices[macroIndex]++;
       }
       break;
   }
 
   keyReportSent = false;
 
-  if (actionType == 0x00 || actionIndex == MACRO_MAX_SIZE)
+  if (actionType == 0x00 ||
+      actionIndices[macroIndex] == MACRO_MAX_SIZE)
   {
+    macroIndex = NO_MACRO;
+  }
+  else if (actionType == MACRO_ACTION_PAUSE)
+  {
+    actionIndices[macroIndex]++;
     macroIndex = NO_MACRO;
   }
 }
@@ -225,7 +231,15 @@ void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex)
 void startMacro(uint8_t index)
 {
   macroIndex = index;
-  actionIndex = 0;
+  actionIndices[macroIndex] = 0;
+
+  loadMacro(macro, index);
+  stepMacro();
+}
+
+void resumeMacro(uint8_t index)
+{
+  macroIndex = index;
 
   loadMacro(macro, index);
   stepMacro();
@@ -233,7 +247,7 @@ void startMacro(uint8_t index)
 
 uint8_t wasPressed = 0x00;
 
-uint8_t checkKey(uint8_t bitMask, uint8_t pressed)
+int8_t checkKey(uint8_t bitMask, uint8_t pressed)
 {
   uint8_t retVal = 0;
 
@@ -245,6 +259,8 @@ uint8_t checkKey(uint8_t bitMask, uint8_t pressed)
   }
   else
   {
+    if (1 == (wasPressed & bitMask))
+      retVal = -1;
     wasPressed &= ~bitMask;
   }
 
@@ -265,6 +281,8 @@ uint8_t checkKey(uint8_t bitMask, uint8_t pressed)
 // ----------------------------------------------------------------------------
 int16_t main(void)
 {
+  int8_t keyState;
+
   enter_DefaultMode_from_RESET();
   /*if (PRESSED(S0))
   {
@@ -295,16 +313,30 @@ int16_t main(void)
         macroUpdated = -1;
       }
 
-      if (checkKey(1 << 0, PRESSED(S0)))
+      if ((keyState = checkKey(1 << 0, PRESSED(S0))) == 1)
         startMacro(0);
-      else if (checkKey(1 << 1, PRESSED(S1)))
+      else if (keyState == -1)
+        resumeMacro(0);
+
+      else if ((keyState = checkKey(1 << 1, PRESSED(S1))) == 1)
         startMacro(1);
-      else if (checkKey(1 << 2, PRESSED(S2)))
+      else if (keyState == -1)
+        resumeMacro(1);
+
+      else if ((keyState = checkKey(1 << 2, PRESSED(S2))) == 1)
         startMacro(2);
-      else if (checkKey(1 << 3, PRESSED(S3)))
+      else if (keyState == -1)
+        resumeMacro(2);
+
+      else if ((keyState = checkKey(1 << 3, PRESSED(S3))) == 1)
         startMacro(3);
-      else if (checkKey(1 << 4, PRESSED(S4)))
+      else if (keyState == -1)
+        resumeMacro(3);
+
+      else if ((keyState = checkKey(1 << 4, PRESSED(S4))) == 1)
         startMacro(4);
+      else if (keyState == -1)
+        resumeMacro(4);
     }
   }
 }
