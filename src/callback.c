@@ -20,7 +20,7 @@
 // Variables
 // ----------------------------------------------------------------------------
 uint8_t tmpBuffer;
-volatile int8_t macroTransfer = -1;
+volatile int8_t workflowTransfer = -1;
 
 uint32_t tmp32;
 
@@ -196,13 +196,13 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
       case ASTROKEY_BREQUEST:
         switch (setup->wIndex)
         {
-          // Read macro off device
-          case ASTROKEY_GET_MACRO:
-            loadMacro(tmpMacro, setup->wValue);
+          // Read workflow off device
+          case ASTROKEY_GET_WORKFLOW:
+            loadWorkflow(tmpWorkflow, setup->wValue);
 
             USBD_Write(EP0,
-                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
-                       EFM8_MIN(MACRO_BYTES, setup->wLength),
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpWorkflow,
+                       EFM8_MIN(WORKFLOW_BYTES, setup->wLength),
                        false);
 
             retVal = USB_STATUS_OK;
@@ -234,14 +234,14 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
     {
       switch (setup->wIndex) // Request type
       {
-        case ASTROKEY_SET_MACRO:
-          memset((void*) tmpMacro, 0, MACRO_BYTES);
+        case ASTROKEY_SET_WORKFLOW:
+          memset((void*) tmpWorkflow, 0, WORKFLOW_BYTES);
           USBD_Read(EP0,
-                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
-                    EFM8_MIN(MACRO_BYTES, setup->wLength),
+                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpWorkflow,
+                    EFM8_MIN(WORKFLOW_BYTES, setup->wLength),
                     true);
 
-          macroTransfer = setup->wValue;
+          workflowTransfer = setup->wValue;
 
           retVal = USB_STATUS_OK;
           break;
@@ -396,10 +396,10 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr,
 
   if (status == USB_STATUS_OK)
   {
-    if (macroTransfer != -1)
+    if (workflowTransfer != -1)
     {
-      macroUpdated = macroTransfer;
-      macroTransfer = -1;
+      workflowUpdated = workflowTransfer;
+      workflowTransfer = -1;
     }
   }
 

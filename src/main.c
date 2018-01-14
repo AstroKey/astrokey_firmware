@@ -59,7 +59,7 @@
 // ----------------------------------------------------------------------------
 // Variables
 // ----------------------------------------------------------------------------
-// Number of keys currently being pressed by the macro
+// Number of keys currently being pressed by the workflow
 uint8_t keysPressed = 0;
 // The current report to send the
 volatile KeyReport_TypeDef keyReport =
@@ -70,25 +70,25 @@ volatile KeyReport_TypeDef keyReport =
 };
 
 volatile bool keyReportSent = false;
-volatile int8_t macroUpdated = -1;
-Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
+volatile int8_t workflowUpdated = -1;
+Action_TypeDef SI_SEG_XDATA tmpWorkflow[WORKFLOW_MAX_SIZE];
 
-// The data of the current macro
-Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
+// The data of the current workflow
+Action_TypeDef SI_SEG_XDATA workflow[WORKFLOW_MAX_SIZE];
 
-// Index of current macro running (i.e. 0 for 1st key, etc.)
-uint8_t macroIndex = NO_MACRO;
+// Index of current workflow running (i.e. 0 for 1st key, etc.)
+uint8_t workflowIndex = NO_WORKFLOW;
 
-// Index of current action in current macro running;
+// Index of current action in current workflow running;
 uint8_t actionIndices[NUM_SWITCHES] = {0};
 
-// Checks if a key is currently pressed by the macro
+// Checks if a key is currently pressed by the workflow
 // Returns the index of the key in array of keys currently pressed,
 // -1 if the key is not currently being pressed
 int8_t keyIsPressed(uint8_t key)
 {
   uint8_t i;
-  for (i = 0; i < MACRO_MAX_KEYS; i++)
+  for (i = 0; i < WORKFLOW_MAX_KEYS; i++)
   {
     if (keyReport.keys[i] == key)
       return i;
@@ -99,7 +99,7 @@ int8_t keyIsPressed(uint8_t key)
 // Presses down a key
 void pressKey(uint8_t key)
 {
-  if (keyIsPressed(key) == -1 && keysPressed < MACRO_MAX_KEYS)
+  if (keyIsPressed(key) == -1 && keysPressed < WORKFLOW_MAX_KEYS)
   {
     keyReport.keys[keysPressed] = key;
     keysPressed++;
@@ -156,27 +156,27 @@ bool curPressDown = false;
 bool delayStarted = false;
 uint32_t delayStartTime;
 
-// Advances the macro one action forward, ending it if the end is reached
-void stepMacro()
+// Advances the workflow one action forward, ending it if the end is reached
+void stepWorkflow()
 {
-  uint8_t actionType = macro[actionIndices[macroIndex]].actionType;
-  uint8_t value = macro[actionIndices[macroIndex]].value;
+  uint8_t actionType = workflow[actionIndices[workflowIndex]].actionType;
+  uint8_t value = workflow[actionIndices[workflowIndex]].value;
   switch (actionType)
   {
-    case MACRO_ACTION_DOWN:
+    case WORKFLOW_ACTION_DOWN:
       pressKey(value);
-      actionIndices[macroIndex]++;
+      actionIndices[workflowIndex]++;
       break;
-    case MACRO_ACTION_UP:
+    case WORKFLOW_ACTION_UP:
       releaseKey(value);
-      actionIndices[macroIndex]++;
+      actionIndices[workflowIndex]++;
       break;
-    case MACRO_ACTION_PRESS:
+    case WORKFLOW_ACTION_PRESS:
       if (curPressDown)
       {
         releaseKey(value);
         curPressDown = false;
-        actionIndices[macroIndex]++;
+        actionIndices[workflowIndex]++;
       }
       else
       {
@@ -184,7 +184,7 @@ void stepMacro()
         curPressDown = true;
       }
       break;
-    case MACRO_ACTION_DELAY:
+    case WORKFLOW_ACTION_DELAY:
       if (!delayStarted)
       {
         delayStarted = true;
@@ -193,61 +193,64 @@ void stepMacro()
       else if ((getMillis() - delayStartTime) > ((uint32_t)value * 100))
       {
         delayStarted = false;
-        actionIndices[macroIndex]++;
+        actionIndices[workflowIndex]++;
       }
+      break;
+    default:
+      actionIndices[workflowIndex]++;
       break;
   }
 
   keyReportSent = false;
 
   if (actionType == 0x00 ||
-      actionIndices[macroIndex] == MACRO_MAX_SIZE)
+      actionIndices[workflowIndex] == WORKFLOW_MAX_SIZE)
   {
-    macroIndex = NO_MACRO;
+    workflowIndex = NO_WORKFLOW;
   }
-  else if (actionType == MACRO_ACTION_PAUSE)
+  else if (actionType == WORKFLOW_ACTION_PAUSE)
   {
-    actionIndices[macroIndex]++;
-    macroIndex = NO_MACRO;
+    actionIndices[workflowIndex]++;
+    workflowIndex = NO_WORKFLOW;
   }
 }
 
-void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex)
+void saveWorkflow(Action_TypeDef* workflowData, uint8_t saveIndex)
 {
   uint8_t i;
-  FLADDR flashAddr = MACRO_FLASH_ADDR + (saveIndex * MACRO_BYTES);
-  for (i = 0; i < MACRO_PAGES; i++)
+  FLADDR flashAddr = WORKFLOW_FLASH_ADDR + (saveIndex * WORKFLOW_BYTES);
+  for (i = 0; i < WORKFLOW_PAGES; i++)
     FLASH_PageErase(flashAddr + (USER_PAGE_SIZE * i));
-  FLASH_Write(flashAddr, (uint8_t*) macroData, MACRO_BYTES);
+  FLASH_Write(flashAddr, (uint8_t*) workflowData, WORKFLOW_BYTES);
 }
 
-void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex)
+void loadWorkflow(Action_TypeDef* workflowData, uint8_t loadIndex)
 {
-  FLADDR flashAddr = MACRO_FLASH_ADDR + (loadIndex * MACRO_BYTES);
-  FLASH_Read((uint8_t *)macroData, flashAddr, MACRO_BYTES);
+  FLADDR flashAddr = WORKFLOW_FLASH_ADDR + (loadIndex * WORKFLOW_BYTES);
+  FLASH_Read((uint8_t *)workflowData, flashAddr, WORKFLOW_BYTES);
 }
 
-// Starts running a macro
-void startMacro(uint8_t index)
+// Starts running a workflow
+void startWorkflow(uint8_t index)
 {
-  macroIndex = index;
-  actionIndices[macroIndex] = 0;
+  workflowIndex = index;
+  actionIndices[workflowIndex] = 0;
 
-  loadMacro(macro, index);
-  stepMacro();
+  loadWorkflow(workflow, index);
+  stepWorkflow();
 }
 
-void resumeMacro(uint8_t index)
+void resumeWorkflow(uint8_t index)
 {
-  macroIndex = index;
+  workflowIndex = index;
 
-  loadMacro(macro, index);
-  stepMacro();
+  loadWorkflow(workflow, index);
+  stepWorkflow();
 }
 
 uint8_t wasPressed = 0x00;
 
-int8_t checkKey(uint8_t bitMask, uint8_t pressed)
+uint8_t checkKeyPressed(uint8_t bitMask, uint8_t pressed)
 {
   uint8_t retVal = 0;
 
@@ -257,10 +260,18 @@ int8_t checkKey(uint8_t bitMask, uint8_t pressed)
       retVal = 1;
     wasPressed |= bitMask;
   }
-  else
+
+  return retVal;
+}
+
+uint8_t checkKeyReleased(uint8_t bitMask, uint8_t pressed)
+{
+  uint8_t retVal = 0;
+
+  if (!pressed)
   {
-    if (1 == (wasPressed & bitMask))
-      retVal = -1;
+    if (wasPressed & bitMask)
+      retVal = 1;
     wasPressed &= ~bitMask;
   }
 
@@ -281,8 +292,6 @@ int8_t checkKey(uint8_t bitMask, uint8_t pressed)
 // ----------------------------------------------------------------------------
 int16_t main(void)
 {
-  int8_t keyState;
-
   enter_DefaultMode_from_RESET();
   /*if (PRESSED(S0))
   {
@@ -298,45 +307,45 @@ int16_t main(void)
       RSTSRC = RSTSRC_SWRSF__SET | RSTSRC_PORSF__SET;
     }
 
-    // Macro currently running
-    if (macroIndex != NO_MACRO)
+    // Workflow currently running
+    if (workflowIndex != NO_WORKFLOW)
     {
       if (keyReportSent)
-        stepMacro();
+        stepWorkflow();
     }
-    // No macro running, scan switches
+    // No workflow running, scan switches
     else
     {
-      if (macroUpdated != -1)
+      if (workflowUpdated != -1)
       {
-        saveMacro(tmpMacro, macroUpdated);
-        macroUpdated = -1;
+        saveWorkflow(tmpWorkflow, workflowUpdated);
+        workflowUpdated = -1;
       }
 
-      if ((keyState = checkKey(1 << 0, PRESSED(S0))) == 1)
-        startMacro(0);
-      else if (keyState == -1)
-        resumeMacro(0);
+      if (checkKeyPressed(1 << 0, PRESSED(S0)))
+        startWorkflow(0);
+      else if (checkKeyReleased(1 << 0, PRESSED(S0)))
+        resumeWorkflow(0);
 
-      else if ((keyState = checkKey(1 << 1, PRESSED(S1))) == 1)
-        startMacro(1);
-      else if (keyState == -1)
-        resumeMacro(1);
+      else if (checkKeyPressed(1 << 1, PRESSED(S1)))
+        startWorkflow(1);
+      else if (checkKeyReleased(1 << 1, PRESSED(S1)))
+        resumeWorkflow(1);
 
-      else if ((keyState = checkKey(1 << 2, PRESSED(S2))) == 1)
-        startMacro(2);
-      else if (keyState == -1)
-        resumeMacro(2);
+      else if (checkKeyPressed(1 << 2, PRESSED(S2)))
+        startWorkflow(2);
+      else if (checkKeyReleased(1 << 2, PRESSED(S2)))
+        resumeWorkflow(2);
 
-      else if ((keyState = checkKey(1 << 3, PRESSED(S3))) == 1)
-        startMacro(3);
-      else if (keyState == -1)
-        resumeMacro(3);
+      else if (checkKeyPressed(1 << 3, PRESSED(S3)))
+        startWorkflow(3);
+      else if (checkKeyReleased(1 << 3, PRESSED(S3)))
+        resumeWorkflow(3);
 
-      else if ((keyState = checkKey(1 << 4, PRESSED(S4))) == 1)
-        startMacro(4);
-      else if (keyState == -1)
-        resumeMacro(4);
+      else if (checkKeyPressed(1 << 4, PRESSED(S4)))
+        startWorkflow(4);
+      else if (checkKeyReleased(1 << 4, PRESSED(S4)))
+        resumeWorkflow(4);
     }
   }
 }

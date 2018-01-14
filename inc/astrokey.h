@@ -14,8 +14,8 @@
 // Astrokey USB protocol
 
 // wIndex values
-#define ASTROKEY_SET_MACRO 0x01
-#define ASTROKEY_GET_MACRO 0x02
+#define ASTROKEY_SET_WORKFLOW 0x01
+#define ASTROKEY_GET_WORKFLOW 0x02
 
 // Switch configuration
 #define NUM_SWITCHES 5
@@ -29,14 +29,14 @@
 #define PRESSED(x) (!x)
 
 // No macro running
-#define NO_MACRO 0xFF
+#define NO_WORKFLOW 0xFF
 
 // Macro action types
-#define MACRO_ACTION_DOWN  1
-#define MACRO_ACTION_UP    2
-#define MACRO_ACTION_PRESS 3
-#define MACRO_ACTION_DELAY 16
-#define MACRO_ACTION_PAUSE 255 // Pauses a macro until key release
+#define WORKFLOW_ACTION_DOWN  1
+#define WORKFLOW_ACTION_UP    2
+#define WORKFLOW_ACTION_PRESS 3
+#define WORKFLOW_ACTION_DELAY 16
+#define WORKFLOW_ACTION_PAUSE 128 // Pauses a macro until key release
 
 #define USAGE_LEFTCTRL  224
 #define USAGE_LEFTSHIFT 225
@@ -52,30 +52,30 @@
 typedef struct {
   uint8_t actionType;
   uint8_t value;
-} Macro_TypeDef;
+} Action_TypeDef;
 
 // User data flash
 #define USER_PAGE_SIZE  64
 #define USER_START_ADDR 0xF800
 
 // Number of pages per macro
-#define MACRO_PAGES 2
+#define WORKFLOW_PAGES 2
 // Number of bytes per macro
-#define MACRO_BYTES (MACRO_PAGES * USER_PAGE_SIZE)
+#define WORKFLOW_BYTES (WORKFLOW_PAGES * USER_PAGE_SIZE)
 // Maximum number of actions in a macro
-#define MACRO_MAX_SIZE ((MACRO_BYTES) / sizeof(Macro_TypeDef))
+#define WORKFLOW_MAX_SIZE ((WORKFLOW_BYTES) / sizeof(Action_TypeDef))
 // Max number of keys simultaenously held by macro
-#define MACRO_MAX_KEYS 6
+#define WORKFLOW_MAX_KEYS 6
 
-#define MACRO_FLASH_ADDR USER_START_ADDR
+#define WORKFLOW_FLASH_ADDR USER_START_ADDR
 
-void saveMacro(Macro_TypeDef* macroData, uint8_t saveIndex);
-void loadMacro(Macro_TypeDef* macroData, uint8_t loadIndex);
+void saveWorkflow(Action_TypeDef* workflowData, uint8_t saveIndex);
+void loadWorkflow(Action_TypeDef* workflowData, uint8_t loadIndex);
 
-extern Macro_TypeDef SI_SEG_XDATA macro[MACRO_MAX_SIZE];
-extern uint8_t macroNumActions;
+extern Action_TypeDef SI_SEG_XDATA workflow[WORKFLOW_MAX_SIZE];
+extern uint8_t workflowNumActions;
 
-extern Macro_TypeDef SI_SEG_XDATA tmpMacro[MACRO_MAX_SIZE];
-extern volatile int8_t macroUpdated;
+extern Action_TypeDef SI_SEG_XDATA tmpWorkflow[WORKFLOW_MAX_SIZE];
+extern volatile int8_t workflowUpdated;
 
 #endif /* INC_ASTROKEY_H_ */
