@@ -106,8 +106,8 @@ extern "C"
     0x46, 0x00, 0x54, 0x00,//
     0x31, 0x00, 0x30, 0x00,//
     0x30, 0x00,//
-    0x20,// Vendor Code
-    0x00// Padding
+    0x20,      // Vendor Code
+    0x00       // Padding
   };
 
   extern SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE);
