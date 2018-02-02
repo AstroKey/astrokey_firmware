@@ -190,7 +190,7 @@ void stepWorkflow()
         delayStarted = true;
         delayStartTime = getMillis();
       }
-      else if ((getMillis() - delayStartTime) > ((uint32_t)value * 100))
+      else if ((getMillis() - delayStartTime) > ((uint32_t)value * 10))
       {
         delayStarted = false;
         actionIndices[workflowIndex]++;
