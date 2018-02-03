@@ -203,7 +203,7 @@ void stepWorkflow()
 
   keyReportSent = false;
 
-  if (actionType == 0x00 ||
+  if (actionType == 0x00 || actionType == WORKFLOW_ACTION_UNPROGRAMMED ||
       actionIndices[workflowIndex] == WORKFLOW_MAX_SIZE)
   {
     workflowIndex = NO_WORKFLOW;

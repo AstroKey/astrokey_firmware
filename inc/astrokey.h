@@ -37,6 +37,7 @@
 #define WORKFLOW_ACTION_PRESS 3
 #define WORKFLOW_ACTION_DELAY 16
 #define WORKFLOW_ACTION_PAUSE 128 // Pauses a macro until key release
+#define WORKFLOW_ACTION_UNPROGRAMMED 255 // Unprogrammed flash memory
 
 #define USAGE_LEFTCTRL  224
 #define USAGE_LEFTSHIFT 225
