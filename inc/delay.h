@@ -1,9 +1,13 @@
-/*
- * delay.h
- *
- *  Created on: Dec 2, 2017
- *      Author: Aaron
- */
+//-----------------------------------------------------------------------------
+// delay.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Declarations for the millisecond counter.
+//
 
 #ifndef INC_DELAY_H_
 #define INC_DELAY_H_

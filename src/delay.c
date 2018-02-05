@@ -1,3 +1,14 @@
+//-----------------------------------------------------------------------------
+// delay.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Implementation of the millisecond counter.
+//
+
 #include "SI_EFM8UB1_Register_Enums.h"
 #include "delay.h"
 

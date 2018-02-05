@@ -1,8 +1,13 @@
-/**************************************************************************//**
- * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
- *
- * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
- *****************************************************************************/
+//-----------------------------------------------------------------------------
+// callback.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Implementations of USB callback functions.
+//
 
 #include "SI_EFM8UB1_Register_Enums.h"
 #include "efm8_usb.h"

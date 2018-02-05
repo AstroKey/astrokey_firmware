@@ -12,7 +12,10 @@
 // The WebUSB Interface allows the AstroKey website to save workflows created by the user to the device.
 // The HID Interface plays back macros.
 //
-#include "SI_EFM8UB1_Register_Enums.h"
+// File Description:
+//
+// The main source code file for the AstroKey firmware.
+//
 #include "astrokey.h"
 
 #include <stdint.h>

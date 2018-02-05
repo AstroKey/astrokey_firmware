@@ -1,9 +1,13 @@
-/*
- * astrokey.h
- *
- *  Created on: Nov 3, 2017
- *      Author: Aaron
- */
+//-----------------------------------------------------------------------------
+// astrokey.h
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// AstroKey-specific definitions and function declarations.
+//
 
 #ifndef INC_ASTROKEY_H_
 #define INC_ASTROKEY_H_

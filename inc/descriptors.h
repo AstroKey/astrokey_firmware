@@ -1,8 +1,20 @@
-/**************************************************************************//**
- * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
- *
- * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
- *****************************************************************************/
+//-----------------------------------------------------------------------------
+// descriptors.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// Portions of this code attributed to the following license:
+//
+// /**************************************************************************//**
+//  * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
+//  *
+//  * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+//  *****************************************************************************/
+//
+// File Description:
+//
+// Declarations of AstroKey USB parameters and descriptors.
 
 #ifndef __SILICON_LABS_DESCRIPTORS_H__
 #define __SILICON_LABS_DESCRIPTORS_H__
@@ -19,17 +31,6 @@ extern "C"
 {
 #endif
 
-// -------------------- USB Identification ------------------------------------
-//
-// **********
-// NOTE: YOU MUST PROVIDE YOUR OWN USB VID/PID (below)
-// **********
-//
-// Following are the definition of the USB VID and PID.  These are example
-// values and are assigned to Silicon Labs.  You may not use the Silicon
-// Labs VID/PID values in your product.  You must provide your own assigned
-// VID and PID values.
-///
 // $[Vendor ID]
 #define USB_VENDOR_ID                      htole16(0x10c4)
 // [Vendor ID]$

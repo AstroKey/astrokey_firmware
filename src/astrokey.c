@@ -1,9 +1,13 @@
-/*
- * astrokey.c
- *
- *  Created on: Feb 4, 2018
- *      Author: Aaron
- */
+//-----------------------------------------------------------------------------
+// astrokey.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Implementation of AstroKey input polling and other device-specific functionality.
+//
 
 #include "astrokey.h"
 #include "InitDevice.h"
