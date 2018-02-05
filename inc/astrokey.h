@@ -79,4 +79,7 @@ extern uint8_t workflowNumActions;
 extern Action_TypeDef SI_SEG_XDATA tmpWorkflow[WORKFLOW_MAX_SIZE];
 extern volatile int8_t workflowUpdated;
 
+void astrokeyInit();
+void astrokeyPoll();
+
 #endif /* INC_ASTROKEY_H_ */
