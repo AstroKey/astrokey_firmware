@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <efm8_usb.h>
+#include "astrokey.h"
 #include "descriptors.h"
 
 
@@ -242,17 +243,14 @@ SI_SEGMENT_VARIABLE(msDesc, const MS_OS_20_DescriptorSet_TypeDef, SI_SEG_CODE) =
 #define MFR_SIZE      9
 #define PROD_STRING   'A','s','t','r','o','K','e','y','\0'
 #define PROD_SIZE     9
-#define SER_STRING    '0','1','2','3','4','5','6','7','8','A','B','C','D','E','F','\0'
-#define SER_SIZE      16
 
 
 LANGID_STATIC_CONST_STRING_DESC( langDesc[], LANG_STRING);
 UTF16LE_PACKED_STATIC_CONST_STRING_DESC( mfrDesc[], MFR_STRING, MFR_SIZE );
 UTF16LE_PACKED_STATIC_CONST_STRING_DESC( prodDesc[], PROD_STRING, PROD_SIZE );
-UTF16LE_PACKED_STATIC_CONST_STRING_DESC( serDesc[], SER_STRING, SER_SIZE );
 
 // USB String Table
-SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myUsbStringTable_USEnglish[], static const USB_StringDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE) = 
+SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myUsbStringTable_USEnglish[], static const USB_StringDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE) =
 {
   (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_CODE))langDesc,
   mfrDesc,
