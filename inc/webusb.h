@@ -1,9 +1,13 @@
-/*
- * webusb.h
- *
- *  Created on: Oct 20, 2017
- *      Author: Aaron
- */
+//-----------------------------------------------------------------------------
+// descriptors.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Declarations of WebUSB constant and descriptors
+//
 
 #ifndef INC_WEBUSB_H_
 #define INC_WEBUSB_H_

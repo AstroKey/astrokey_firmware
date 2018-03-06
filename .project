@@ -49,11 +49,6 @@
 			<locationURI>STUDIO_SDK_LOC/Lib/efm8_usb/src/efm8_usbd.c</locationURI>
 		</link>
 		<link>
-			<name>lib/efm8_usb/src/efm8_usbdch9.c</name>
-			<type>1</type>
-			<locationURI>STUDIO_SDK_LOC/Lib/efm8_usb/src/efm8_usbdch9.c</locationURI>
-		</link>
-		<link>
 			<name>lib/efm8_usb/src/efm8_usbdep.c</name>
 			<type>1</type>
 			<locationURI>STUDIO_SDK_LOC/Lib/efm8_usb/src/efm8_usbdep.c</locationURI>

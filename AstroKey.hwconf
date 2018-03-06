@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/ss/hwconfig/document/device.ecore" name="EFM8UB10F8G-C-QFN20" partId="mcu.8051.efm8.ub1.efm8ub10f8g-c-qfn20" version="4.0.1" contextId="%DEFAULT%">
+<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/ss/hwconfig/document/device.ecore" name="EFM8UB10F16G-C-QFN20" partId="mcu.8051.efm8.ub1.efm8ub10f16g-c-qfn20" version="4.0.1" contextId="%DEFAULT%">
   <mode name="DefaultMode">
     <property object="ADC_0" propertyId="adc.configuration.sarclockdivider" value="6"/>
     <property object="CIP51_0" propertyId="ABPeripheral.included" value="true"/>
@@ -11,6 +11,7 @@
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
     <property object="INTERRUPT_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enableallinterrupts" value="Enabled"/>
+    <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enabletimer2interrupt" value="Enabled"/>
     <property object="INTERRUPT_0" propertyId="interruptenables.codegenerationoptions.generateinterruptfunctions" value="Disabled"/>
     <property object="P0.0" propertyId="ports.settings.label" value="S0"/>
     <property object="P0.0" propertyId="ports.settings.skip" value="Skipped"/>
@@ -28,6 +29,20 @@
     <property object="SPI_0" propertyId="spi.clockrate.sysclk" value="24.500 MHz"/>
     <property object="SPI_0" propertyId="spi.clockrate.sysclkdividercoefficientspi0ckr" value="7"/>
     <property object="SPI_0" propertyId="spi.control.slaveselectmode" value="Slave or master 3-wire mode"/>
+    <property object="TIMER01_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="TIMER16_2" propertyId="ABPeripheral.included" value="true"/>
+    <property object="TIMER16_2" propertyId="timer16.control.runcontrol" value="Start"/>
+    <property object="TIMER16_2" propertyId="timer16.control.timerrunningstate" value="Timer is Running"/>
+    <property object="TIMER16_2" propertyId="timer16.highbyte.highbyte" value="240"/>
+    <property object="TIMER16_2" propertyId="timer16.initandreloadvalue.targetoverflowfrequency" value="1000"/>
+    <property object="TIMER16_2" propertyId="timer16.initandreloadvalue.timerinitvalue" value="61536"/>
+    <property object="TIMER16_2" propertyId="timer16.initandreloadvalue.timerreloadvalue" value="61536"/>
+    <property object="TIMER16_2" propertyId="timer16.lowbyte.lowbyte" value="96"/>
+    <property object="TIMER16_2" propertyId="timer16.reloadhighbyte.reloadhighbyte" value="240"/>
+    <property object="TIMER16_2" propertyId="timer16.reloadlowbyte.reloadlowbyte" value="96"/>
+    <property object="TIMER16_3" propertyId="ABPeripheral.included" value="true"/>
+    <property object="TIMER16_4" propertyId="ABPeripheral.included" value="true"/>
+    <property object="TIMER_SETUP_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="USBLIB_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="USBLIB_0" propertyId="configuration.configurationparameters.configurationstring" value=""/>
     <property object="USBLIB_0" propertyId="configuration.configurationparameters.devicepower" value="Bus-Powered"/>

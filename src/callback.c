@@ -1,8 +1,13 @@
-/**************************************************************************//**
- * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
- *
- * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
- *****************************************************************************/
+//-----------------------------------------------------------------------------
+// callback.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// File Description:
+//
+// Implementations of USB callback functions.
+//
 
 #include "SI_EFM8UB1_Register_Enums.h"
 #include "efm8_usb.h"
@@ -10,6 +15,7 @@
 #include "idle.h"
 #include "webusb.h"
 #include "astrokey.h"
+#include "delay.h"
 
 // ----------------------------------------------------------------------------
 // Constants
@@ -19,7 +25,9 @@
 // Variables
 // ----------------------------------------------------------------------------
 uint8_t tmpBuffer;
-volatile int8_t macroTransfer = -1;
+volatile int8_t workflowTransfer = -1;
+
+uint32_t tmp32;
 
 // ----------------------------------------------------------------------------
 // Functions
@@ -193,16 +201,28 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
       case ASTROKEY_BREQUEST:
         switch (setup->wIndex)
         {
-          // Read macro off device
-          case ASTROKEY_GET_MACRO:
-            loadMacro(tmpMacro, setup->wValue);
+          // Read workflow off device
+          case ASTROKEY_GET_WORKFLOW:
+            loadWorkflow(tmpWorkflow, setup->wValue);
 
             USBD_Write(EP0,
-                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
-                       EFM8_MIN(MACRO_BYTES, setup->wLength),
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpWorkflow,
+                       EFM8_MIN(WORKFLOW_BYTES, setup->wLength),
                        false);
 
             retVal = USB_STATUS_OK;
+            break;
+          case 0xF0:
+
+            tmp32 = getMillis();
+
+            USBD_Write(EP0,
+                       (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))&tmp32,
+                       EFM8_MIN(sizeof(tmp32), setup->wLength),
+                       false);
+
+            retVal = USB_STATUS_OK;
+
             break;
         }
         break;
@@ -219,14 +239,14 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
     {
       switch (setup->wIndex) // Request type
       {
-        case ASTROKEY_SET_MACRO:
-          memset((void*) tmpMacro, 0, MACRO_BYTES);
+        case ASTROKEY_SET_WORKFLOW:
+          memset((void*) tmpWorkflow, 0, WORKFLOW_BYTES);
           USBD_Read(EP0,
-                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpMacro,
-                    EFM8_MIN(MACRO_BYTES, setup->wLength),
+                    (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))tmpWorkflow,
+                    EFM8_MIN(WORKFLOW_BYTES, setup->wLength),
                     true);
 
-          macroTransfer = setup->wValue;
+          workflowTransfer = setup->wValue;
 
           retVal = USB_STATUS_OK;
           break;
@@ -247,7 +267,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 1: // Interface 1
+            case HID_KEYBOARD_IFC: // HID Interface
 
               USBD_Write(EP0,
                          (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))ReportDescriptor0,
@@ -264,10 +284,9 @@ USB_Status_TypeDef USBD_SetupCmdCb(SI_VARIABLE_SEGMENT_POINTER(
         {
           switch (setup->wIndex)
           {
-            case 1: // Interface 1
-
+            case HID_KEYBOARD_IFC: // HID Interface
               USBD_Write(EP0,
-                         (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&configDesc[18]),
+                         (SI_VARIABLE_SEGMENT_POINTER(, uint8_t, SI_SEG_GENERIC))(&configDesc[27]),
                          EFM8_MIN(USB_HID_DESCSIZE, setup->wLength),
                          false);
               retVal = USB_STATUS_OK;
@@ -382,10 +401,10 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr,
 
   if (status == USB_STATUS_OK)
   {
-    if (macroTransfer != -1)
+    if (workflowTransfer != -1)
     {
-      macroUpdated = macroTransfer;
-      macroTransfer = -1;
+      workflowUpdated = workflowTransfer;
+      workflowTransfer = -1;
     }
   }
 

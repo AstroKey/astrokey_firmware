@@ -45,7 +45,7 @@
 // settings
 // -----------------------------------------------------------------------------
 // $[Number of Interfaces]
-#define SLAB_USB_NUM_INTERFACES                2
+#define SLAB_USB_NUM_INTERFACES                1
 #define SLAB_USB_SUPPORT_ALT_INTERFACES        0
 // [Number of Interfaces]$
 

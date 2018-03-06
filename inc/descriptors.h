@@ -1,8 +1,20 @@
-/**************************************************************************//**
- * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
- *
- * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
- *****************************************************************************/
+//-----------------------------------------------------------------------------
+// descriptors.c
+//-----------------------------------------------------------------------------
+// Copyright 2018 AstroKey
+// https://github.com/AstroKey/astrokey_firmware/blob/master/LICENSE
+//
+// Portions of this code attributed to the following license:
+//
+// /**************************************************************************//**
+//  * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
+//  *
+//  * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+//  *****************************************************************************/
+//
+// File Description:
+//
+// Declarations of AstroKey USB parameters and descriptors.
 
 #ifndef __SILICON_LABS_DESCRIPTORS_H__
 #define __SILICON_LABS_DESCRIPTORS_H__
@@ -19,17 +31,6 @@ extern "C"
 {
 #endif
 
-// -------------------- USB Identification ------------------------------------
-//
-// **********
-// NOTE: YOU MUST PROVIDE YOUR OWN USB VID/PID (below)
-// **********
-//
-// Following are the definition of the USB VID and PID.  These are example
-// values and are assigned to Silicon Labs.  You may not use the Silicon
-// Labs VID/PID values in your product.  You must provide your own assigned
-// VID and PID values.
-///
 // $[Vendor ID]
 #define USB_VENDOR_ID                      htole16(0x10c4)
 // [Vendor ID]$
@@ -42,7 +43,7 @@ extern "C"
 #define KEYBOARD_IN_EP_ADDR   EP1IN
 
 // Interface number of the HID keyboard
-#define HID_KEYBOARD_IFC                  0
+#define HID_KEYBOARD_IFC                  1
 
 // Keyboard Report
   typedef struct
@@ -52,8 +53,8 @@ extern "C"
     uint8_t keys[6];
   } KeyReport_TypeDef;
 
-extern KeyReport_TypeDef keyReport;
-extern volatile bool keyReportSent;
+  extern volatile KeyReport_TypeDef keyReport;
+  extern volatile bool keyReportSent;
 
 // bRequest number for WebUSB requests
 #define WEBUSB_BREQUEST                   1
@@ -65,23 +66,23 @@ extern volatile bool keyReportSent;
 #define ASTROKEY_BREQUEST                 3
 
 // BOS Descriptor + Platform Capability Descriptors
-typedef struct
-{
-  USB_BOSDescriptor_TypeDef bos;
-  USB20_ExtCapability_TypeDef ext;
-  WebUSB_DevCapability_TypeDef webCap;
-  MS_OS_20_DevCapability_TypeDef msCap;
-} USB_BOS_TypeDef;
+  typedef struct
+  {
+    USB_BOSDescriptor_TypeDef bos;
+    USB20_ExtCapability_TypeDef ext;
+    WebUSB_DevCapability_TypeDef webCap;
+    MS_OS_20_DevCapability_TypeDef msCap;
+  } USB_BOS_TypeDef;
 
 // Dumb Microsoft OS 2.0 Descriptor Set
-typedef struct
-{
-  MS_OS_20_DescSetHeader_TypeDef descSet;
-  MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
-  MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
-  MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
-  MS_OS_20_DeviceIntGUID_TypeDef devIntGUID;
-} MS_OS_20_DescriptorSet_TypeDef;
+  typedef struct
+  {
+    MS_OS_20_DescSetHeader_TypeDef descSet;
+    MS_OS_20_ConfSubsetHeader_TypeDef confSubset;
+    MS_OS_20_FuncSubsetHeader_TypeDef funcSubset;
+    MS_OS_20_CompatibleID_Descriptor_TypeDef compatibleID;
+    MS_OS_20_DeviceIntGUID_TypeDef devIntGUID;
+  } MS_OS_20_DescriptorSet_TypeDef;
 
 // Sizes of MS OS 2.0 Descriptor Subsets
 #define MS_DSH_S htole16(sizeof(MS_OS_20_DescSetHeader_TypeDef))
@@ -106,8 +107,8 @@ typedef struct
     0x46, 0x00, 0x54, 0x00,//
     0x31, 0x00, 0x30, 0x00,//
     0x30, 0x00,//
-    0x20,// Vendor Code
-    0x00// Padding
+    0x20,      // Vendor Code
+    0x00       // Padding
   };
 
   extern SI_SEGMENT_VARIABLE_SEGMENT_POINTER(myURLs[], const USB_URLDescriptor_TypeDef, SI_SEG_GENERIC, const SI_SEG_CODE);
